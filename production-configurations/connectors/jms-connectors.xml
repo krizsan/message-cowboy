@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This file is part of Message Cowboy.
+    Copyright 2014 Ivan A Krizsan. All Rights Reserved.
+    Message Cowboy is free software:
+    you can redistribute it and/or modify it under the terms of the GNU General
+    Public License as published by the Free Software Foundation, either version 3
+    of the License, or (at your option) any later version.
+ 
+    This program is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+    details.
+ 
+    You should have received a copy of the GNU General Public License along with
+    this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+<mule
+    xmlns="http://www.mulesoft.org/schema/mule/core"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:spring="http://www.springframework.org/schema/beans"
+    xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+    xmlns:amq="http://activemq.apache.org/schema/core"
+    xmlns:test="http://www.mulesoft.org/schema/mule/test"
+    xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd
+http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/test/current/mule-test.xsd">
+
+    <spring:beans>
+        <spring:bean name="amqRedeliveryPolicy" class="org.apache.activemq.RedeliveryPolicy">
+            <spring:property name="maximumRedeliveries" value="-1"/>
+            <spring:property name="initialRedeliveryDelay" value="500"/>
+            <spring:property name="useExponentialBackOff" value="false"/>
+            <spring:property name="backOffMultiplier" value="5"/>
+            <spring:property name="maximumRedeliveryDelay" value="-1"/>
+        </spring:bean>
+        
+        <!--
+            If the broker URL "vm://localhost" is used, then the parameter
+            create=false should be added.
+            Otherwise an embedded ActiveMQ instance will be stopped and
+            started each time the transport service's configurations are
+            refreshed.
+        -->
+        <spring:bean name="amqConnectionFactory"
+            class="org.apache.activemq.ActiveMQConnectionFactory">
+            <spring:property name="brokerURL" value="tcp://localhost:61616"/>
+            <spring:property name="redeliveryPolicy" ref="amqRedeliveryPolicy"/>
+        </spring:bean>
+    </spring:beans>
+
+    <!--
+        JMS connector that will not propagate the Mule session.
+    -->
+    <jms:connector name="jmsNoSessionConnector"
+        connectionFactory-ref="amqConnectionFactory"
+        disableTemporaryReplyToDestinations="true"
+        persistentDelivery="true"
+        specification="1.1">
+        <service-overrides sessionHandler="org.mule.session.NullSessionHandler"/>
+    </jms:connector>
+    
+</mule>

@@ -1,0 +1,251 @@
+<!--
+    This file is part of Message Cowboy.
+    Copyright 2014 Ivan A Krizsan. All Rights Reserved.
+    Message Cowboy is free software:
+    You can redistribute it and/or modify it under the terms of the GNU General
+    Public License as published by the Free Software Foundation, either version 3
+    of the License, or (at your option) any later version.
+ 
+    This program is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+    details.
+ 
+    You should have received a copy of the GNU General Public License along with
+    this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+<project 
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>se.ivankrizsan.messagecowboy</groupId>
+    <artifactId>message-cowboy</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <properties>
+        <junit.version>4.11</junit.version>
+        <mule.version>3.4.0</mule.version>
+        <!-- Use the same Spring version as Mule uses. -->
+        <spring.version>3.2.1.RELEASE</spring.version>
+        <!--
+            Version of Spring Data JPA that has depends on a version of
+            the Spring framework that is not newer than the one used here.
+        -->
+        <spring.data.jpa.version>1.4.5.RELEASE</spring.data.jpa.version>
+        
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <eclipsePluginVersion>2.8</eclipsePluginVersion>
+        
+        <jdkName>JavaSE-1.7</jdkName>
+        <jdk.version>1.7</jdk.version>
+    </properties>
+
+    <dependencies>
+        <!-- Mule dependencies. -->
+        <dependency>
+            <groupId>org.mule</groupId>
+            <artifactId>mule-core</artifactId>
+            <version>${mule.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-module-spring-config</artifactId>
+            <version>${mule.version}</version>
+        </dependency>
+
+        <!-- Mule transports -->
+        <dependency>
+            <groupId>org.mule.transports</groupId>
+            <artifactId>mule-transport-file</artifactId>
+            <version>${mule.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.transports</groupId>
+            <artifactId>mule-transport-http</artifactId>
+            <version>${mule.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.transports</groupId>
+            <artifactId>mule-transport-jdbc</artifactId>
+            <version>${mule.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.transports</groupId>
+            <artifactId>mule-transport-jms</artifactId>
+            <version>${mule.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.transports</groupId>
+            <artifactId>mule-transport-vm</artifactId>
+            <version>${mule.version}</version>
+        </dependency>
+        
+        <!-- Mule modules -->
+        <dependency>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-module-client</artifactId>
+            <version>${mule.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-module-cxf</artifactId>
+            <version>${mule.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-module-sxc</artifactId>
+            <version>${mule.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-module-xml</artifactId>
+            <version>${mule.version}</version>
+        </dependency>
+        
+        <!-- Spring dependencies. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+            <version>${spring.data.jpa.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>2.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>eclipselink</artifactId>
+            <version>2.5.1</version>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-all</artifactId>
+            <version>5.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.xbean</groupId>
+            <artifactId>xbean-spring</artifactId>
+            <version>3.9</version>
+        </dependency>
+
+        <!-- Test dependencies. -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mule.tests</groupId>
+            <artifactId>mule-tests-functional</artifactId>
+            <version>${mule.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.8.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.8.5</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>Central</id>
+            <name>Central</name>
+            <url>http://repo1.maven.org/maven2/</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
+            <id>mulesoft-releases</id>
+            <name>MuleSoft Releases Repository</name>
+            <url>http://repository.mulesoft.org/releases/</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
+            <id>mulesoft-snapshots</id>
+            <name>MuleSoft Snapshots Repository</name>
+            <url>http://repository.mulesoft.org/snapshots/</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>mulesoft-release</id>
+            <name>mulesoft release repository</name>
+            <layout>default</layout>
+            <url>http://repository.mulesoft.org/releases/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+</project>
