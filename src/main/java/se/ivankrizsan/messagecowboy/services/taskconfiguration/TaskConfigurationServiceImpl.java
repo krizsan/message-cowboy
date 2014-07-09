@@ -44,7 +44,7 @@ public class TaskConfigurationServiceImpl implements TaskConfigurationService {
     @Override
     public List<MessageCowboySchedulableTaskConfig> findAllEnabled() {
         final List<MessageCowboySchedulableTaskConfig> theTaskConfigurations;
-        theTaskConfigurations = mTaskConfigurationRepository.findAll();
+        theTaskConfigurations = mTaskConfigurationRepository.findAllEnabled();
         return theTaskConfigurations;
     }
 

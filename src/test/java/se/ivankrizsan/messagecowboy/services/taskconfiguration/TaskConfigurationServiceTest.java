@@ -92,6 +92,7 @@ public class TaskConfigurationServiceTest {
         final List<MessageCowboySchedulableTaskConfig> theResultList =
             mServiceUnderTest.findAll();
         Assert.assertNotNull(theResultList);
+        Assert.assertEquals("All tasks expected", 2, theResultList.size());
     }
 
     /**
@@ -102,5 +103,6 @@ public class TaskConfigurationServiceTest {
         final List<MessageCowboySchedulableTaskConfig> theResultList =
             mServiceUnderTest.findAllEnabled();
         Assert.assertNotNull(theResultList);
+        Assert.assertEquals("Only enabled tasks expected", 1, theResultList.size());
     }
 }
