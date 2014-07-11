@@ -17,7 +17,6 @@
 package se.ivankrizsan.messagecowboy.services.scheduling;
 
 import java.util.Arrays;
-
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -25,7 +24,6 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.MethodInvoker;
-
 import se.ivankrizsan.messagecowboy.domain.entities.TaskJob;
 
 /**
@@ -37,7 +35,9 @@ import se.ivankrizsan.messagecowboy.domain.entities.TaskJob;
  * If the target method takes no parameters, no entry need to be specified
  * in the job data map.<br/>
  * All types of exceptions that occur when the target method is invoked are
- * caught by this job.
+ * caught by this job.<br/>
+ * This class must be public since otherwise Spring cannot instantiate
+ * it when creating new job instances.
  *
  * @author Ivan Krizsan
  */
@@ -57,8 +57,8 @@ public class MethodInvokingJob implements TaskJob, Job {
         "_methodinvokingjob_targetmethodparams";
 
     @Override
-    public void execute(
-        final JobExecutionContext inContext) throws JobExecutionException {
+    public void execute(final JobExecutionContext inContext)
+        throws JobExecutionException {
         final JobDataMap theJobDataMap =
             inContext.getJobDetail().getJobDataMap();
         final String theTaskName = inContext.getJobDetail().getKey().getName();
@@ -117,12 +117,11 @@ public class MethodInvokingJob implements TaskJob, Job {
                  * Catch all exceptions, in order to allow the program to 
                  * continue to run despite exceptions.
                  */
-                LOGGER.error(
-                    "An error occurred invoking the method "
-                        + theTargetMethodName + " on object of" + " the type "
-                        + theTargetObject.getClass().getName()
-                        + " with the parameters "
-                        + Arrays.asList(theTargetMethodParams).toString(),
+                LOGGER.error("An error occurred invoking the method "
+                    + theTargetMethodName + " on object of" + " the type "
+                    + theTargetObject.getClass().getName()
+                    + " with the parameters "
+                    + Arrays.asList(theTargetMethodParams).toString(),
                     theException);
             }
 

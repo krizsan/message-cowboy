@@ -18,7 +18,6 @@ package se.ivankrizsan.messagecowboy.integrationtest;
 
 import java.io.File;
 import java.util.Date;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,10 +27,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.services.starter.MessageCowboyStarterService;
-import se.ivankrizsan.messagecowboy.services.taskconfiguration.SchedulableTaskConfigurationRepository;
+import se.ivankrizsan.messagecowboy.services.taskconfiguration.TaskConfigurationService;
 import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
 
 /**
@@ -49,7 +47,7 @@ public class TaskConfigRefreshTest extends AbstractTestBaseClass {
 
     /* Instance variable(s): */
     @Autowired
-    private SchedulableTaskConfigurationRepository mRepository;
+    private TaskConfigurationService mTaskConfigurationService;
     @Autowired
     private MessageCowboyStarterService mMessageCowboyService;
 
@@ -88,7 +86,7 @@ public class TaskConfigRefreshTest extends AbstractTestBaseClass {
         theTask.setOutboundEndpoint(theOutboundFileEndpointUri);
         theTask.setTaskEnabledFlag(true);
 
-        mRepository.save(theTask);
+        mTaskConfigurationService.save(theTask);
 
         mMessageCowboyService.scheduleTasks();
     }
@@ -114,14 +112,14 @@ public class TaskConfigRefreshTest extends AbstractTestBaseClass {
     public void testModifyTaskConfigurationBeforeFileMove() throws Exception {
         /* Modify the task configuration before task is executed. */
         final MessageCowboySchedulableTaskConfig theTaskConfigToModify =
-            mRepository.findOne(TEST_TASK_CONFIG_NAME);
+            mTaskConfigurationService.find(TEST_TASK_CONFIG_NAME);
         final String theInputDirPath =
             mTestFile.getAbsolutePath().replaceAll("\\" + File.separator, "/");
         final String theInboundFileEndpointUri =
             "file://" + theInputDirPath
                 + "?connector=nonStreamingFileConnectorInbound";
         theTaskConfigToModify.setInboundEndpointURI(theInboundFileEndpointUri);
-        mRepository.save(theTaskConfigToModify);
+        mTaskConfigurationService.save(theTaskConfigToModify);
 
         /* Simulate scheduled refresh of tasks. */
         mMessageCowboyService.scheduleTasks();

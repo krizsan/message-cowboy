@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.mule.api.MuleContext;
 import org.mule.api.MuleException;
@@ -33,7 +32,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
-
 import se.ivankrizsan.messagecowboy.domain.entities.MoverMessage;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MuleMoverMessage;
 import se.ivankrizsan.messagecowboy.services.transport.exceptions.TransportException;
@@ -80,14 +78,13 @@ class MuleTransportService implements TransportService {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public synchronized void dispatch(
-        final MoverMessage inMessage, final String inEndpointURI)
-        throws TransportException {
+    public synchronized void dispatch(final MoverMessage inMessage,
+        final String inEndpointURI) throws TransportException {
         try {
             @SuppressWarnings("unchecked")
             final MoverMessage<MuleMessage> theMuleMoverMessage = inMessage;
-            mMuleClient.dispatch(inEndpointURI,
-                theMuleMoverMessage.getMessage());
+            mMuleClient.dispatch(inEndpointURI, theMuleMoverMessage
+                .getMessage());
 
             LOGGER.debug("Sent message: {}", inMessage);
         } catch (MuleException theException) {
@@ -323,7 +320,8 @@ class MuleTransportService implements TransportService {
      * Retrieves the Mule context.<br/>
      * For testing purposes only.
      *
-     * @return Mule context of the started Mule transport service, or null if no context is available.
+     * @return Mule context of the started Mule transport service, or null
+     * if no context is available.
      */
     synchronized MuleContext getMuleContext() {
         MuleContext theMuleContext = null;

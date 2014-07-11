@@ -17,9 +17,7 @@
 package se.ivankrizsan.messagecowboy.services.taskconfiguration;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
-
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 
 /**
@@ -35,6 +33,13 @@ public class TaskConfigurationServiceImpl implements TaskConfigurationService {
     protected SchedulableTaskConfigurationRepository mTaskConfigurationRepository;
 
     @Override
+    public MessageCowboySchedulableTaskConfig find(final String inName) {
+        final MessageCowboySchedulableTaskConfig theTaskConfiguration =
+            mTaskConfigurationRepository.findOne(inName);
+        return theTaskConfiguration;
+    }
+
+    @Override
     public List<MessageCowboySchedulableTaskConfig> findAll() {
         final List<MessageCowboySchedulableTaskConfig> theTaskConfigurations =
             mTaskConfigurationRepository.findAll();
@@ -46,6 +51,14 @@ public class TaskConfigurationServiceImpl implements TaskConfigurationService {
         final List<MessageCowboySchedulableTaskConfig> theTaskConfigurations;
         theTaskConfigurations = mTaskConfigurationRepository.findAllEnabled();
         return theTaskConfigurations;
+    }
+
+    @Override
+    public MessageCowboySchedulableTaskConfig save(
+        final MessageCowboySchedulableTaskConfig inTaskConfig) {
+        final MessageCowboySchedulableTaskConfig theSavedTaskConfig =
+            mTaskConfigurationRepository.saveAndFlush(inTaskConfig);
+        return theSavedTaskConfig;
     }
 
     /**

@@ -18,16 +18,20 @@ package se.ivankrizsan.messagecowboy.services.taskconfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.AdditionalAnswers;
 import org.mockito.Mockito;
-
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 
 /**
  * Implements test of the {@code TaskConfigurationServiceImpl} class.
+ * The value of this test may be questionable, since the task configuration
+ * service merely wraps the task configuration repository, which code in turn
+ * is generated.
  * 
  * @author Ivan Krizsan
  */
@@ -45,17 +49,17 @@ public class TaskConfigurationServiceTest {
     public void setUp() {
         final TaskConfigurationServiceImpl theServiceUnderTest =
             new TaskConfigurationServiceImpl();
-        /* Create enabled task configuration mock. */
+        /* Create enabled task configuration. */
         final MessageCowboySchedulableTaskConfig theEnabledTaskConfig =
-            Mockito.mock(MessageCowboySchedulableTaskConfig.class);
-        Mockito.when(theEnabledTaskConfig.getTaskEnabledFlag())
-            .thenReturn(true);
+            new MessageCowboySchedulableTaskConfig();
+        theEnabledTaskConfig.setName("config1");
+        theEnabledTaskConfig.setTaskEnabledFlag(true);
 
-        /* Create disabled task configuration mock. */
+        /* Create disabled task configuration. */
         final MessageCowboySchedulableTaskConfig theDisabledTaskConfig =
-            Mockito.mock(MessageCowboySchedulableTaskConfig.class);
-        Mockito.when(theDisabledTaskConfig.getTaskEnabledFlag()).thenReturn(
-            false);
+            new MessageCowboySchedulableTaskConfig();
+        theDisabledTaskConfig.setName("config2");
+        theDisabledTaskConfig.setTaskEnabledFlag(false);
 
         /* List holding enabled and disabled task configurations. */
         final List<MessageCowboySchedulableTaskConfig> theAllTaskConfigs =
@@ -76,9 +80,23 @@ public class TaskConfigurationServiceTest {
         /* findAllEnabled returns only enabled task configurations. */
         Mockito.when(theMockRepository.findAllEnabled()).thenReturn(
             theEnabledTaskConfigs);
-        /* find returns null regardless of argument. */
+        /* find returns task configuration with supplied name. */
         Mockito.when(theMockRepository.findOne(Mockito.anyString()))
-            .thenReturn(null);
+            .thenAnswer(new Answer<MessageCowboySchedulableTaskConfig>() {
+                @Override
+                public MessageCowboySchedulableTaskConfig answer(
+                    final InvocationOnMock inInvocation) throws Throwable {
+                    final MessageCowboySchedulableTaskConfig theTaskConfig =
+                        new MessageCowboySchedulableTaskConfig();
+                    theTaskConfig
+                        .setName((String) inInvocation.getArguments()[0]);
+                    return theTaskConfig;
+                }
+            });
+        /* save returns the supplied task configuration. */
+        Mockito.doAnswer(AdditionalAnswers.returnsFirstArg()).when(
+            theMockRepository).saveAndFlush(
+            Mockito.any(MessageCowboySchedulableTaskConfig.class));
 
         theServiceUnderTest.setTaskConfigurationRepository(theMockRepository);
         mServiceUnderTest = theServiceUnderTest;
@@ -103,6 +121,24 @@ public class TaskConfigurationServiceTest {
         final List<MessageCowboySchedulableTaskConfig> theResultList =
             mServiceUnderTest.findAllEnabled();
         Assert.assertNotNull(theResultList);
-        Assert.assertEquals("Only enabled tasks expected", 1, theResultList.size());
+        Assert.assertEquals("Only enabled tasks expected", 1, theResultList
+            .size());
+    }
+
+    /**
+     * Tests saving of a task configuration.
+     */
+    @Test
+    public void testSave() {
+        final MessageCowboySchedulableTaskConfig theSaveTaskConfig =
+            new MessageCowboySchedulableTaskConfig();
+        theSaveTaskConfig.setName("I was saved!");
+
+        final MessageCowboySchedulableTaskConfig theSavedTaskConfig =
+            mServiceUnderTest.save(theSaveTaskConfig);
+
+        /* The name is the id and should stay the same. */
+        Assert.assertEquals(theSaveTaskConfig.getName(), theSavedTaskConfig
+            .getName());
     }
 }

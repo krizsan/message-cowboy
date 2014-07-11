@@ -17,18 +17,19 @@
 package se.ivankrizsan.messagecowboy.services.transport;
 
 /**
- * Holds information about one Mule configuration resource, such as name and a checksum of the resource.
+ * Holds information about one Mule configuration resource, such as name and a
+ * checksum of the resource.
  * Instances of this class are immutable.
  *
  * @author Ivan Krizsan
  */
-class MuleConfigurationResourceInfo implements Comparable<MuleConfigurationResourceInfo> {
+class MuleConfigurationResourceInfo implements
+    Comparable<MuleConfigurationResourceInfo> {
     /* Constant(s): */
 
     /* Instance variable(s): */
     protected String mResourceName;
     protected String mResourceChecksum;
-
 
     /**
      * Creates a resource info instance for configuration resource with supplied name
@@ -37,9 +38,11 @@ class MuleConfigurationResourceInfo implements Comparable<MuleConfigurationResou
      * @param inResourceName Name of configuration resource.
      * @param inResourceChecksum Checksum of configuration resource.
      */
-    public MuleConfigurationResourceInfo(final String inResourceName, final String inResourceChecksum) {
+    public MuleConfigurationResourceInfo(final String inResourceName,
+        final String inResourceChecksum) {
         if (inResourceName == null || inResourceChecksum == null) {
-            throw new IllegalArgumentException("Name and checksum must not be null");
+            throw new IllegalArgumentException(
+                "Name and checksum must not be null");
         }
 
         mResourceName = inResourceName;
@@ -58,8 +61,14 @@ class MuleConfigurationResourceInfo implements Comparable<MuleConfigurationResou
     public int hashCode() {
         final int thePrime = 31;
         int theResult = 1;
-        theResult = thePrime * theResult + ((mResourceChecksum == null) ? 0 : mResourceChecksum.hashCode());
-        theResult = thePrime * theResult + ((mResourceName == null) ? 0 : mResourceName.hashCode());
+        theResult =
+            thePrime
+                * theResult
+                + ((mResourceChecksum == null) ? 0 : mResourceChecksum
+                    .hashCode());
+        theResult =
+            thePrime * theResult
+                + ((mResourceName == null) ? 0 : mResourceName.hashCode());
         return theResult;
     }
 
@@ -74,12 +83,14 @@ class MuleConfigurationResourceInfo implements Comparable<MuleConfigurationResou
         if (getClass() != inObjectToCompare.getClass()) {
             return false;
         }
-        MuleConfigurationResourceInfo theOtherConfigRsrscInfo = (MuleConfigurationResourceInfo) inObjectToCompare;
+        MuleConfigurationResourceInfo theOtherConfigRsrscInfo =
+            (MuleConfigurationResourceInfo) inObjectToCompare;
         if (mResourceChecksum == null) {
             if (theOtherConfigRsrscInfo.mResourceChecksum != null) {
                 return false;
             }
-        } else if (!mResourceChecksum.equals(theOtherConfigRsrscInfo.mResourceChecksum)) {
+        } else if (!mResourceChecksum
+            .equals(theOtherConfigRsrscInfo.mResourceChecksum)) {
             return false;
         }
         if (mResourceName == null) {
@@ -97,8 +108,10 @@ class MuleConfigurationResourceInfo implements Comparable<MuleConfigurationResou
      * Only compares with regard to the name of the configuration resource.
      */
     @Override
-    public int compareTo(final MuleConfigurationResourceInfo inOtherConfigRsrcInfo) {
-        final int theCompareResult = mResourceName.compareTo(inOtherConfigRsrcInfo.getResourceName());
+    public int compareTo(
+        final MuleConfigurationResourceInfo inOtherConfigRsrcInfo) {
+        final int theCompareResult =
+            mResourceName.compareTo(inOtherConfigRsrcInfo.getResourceName());
         return theCompareResult;
     }
 }

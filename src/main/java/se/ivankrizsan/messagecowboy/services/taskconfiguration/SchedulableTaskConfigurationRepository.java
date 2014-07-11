@@ -30,7 +30,7 @@ import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulabl
  *
  * @author Ivan Krizsan
  */
-public interface SchedulableTaskConfigurationRepository extends
+interface SchedulableTaskConfigurationRepository extends
     JpaRepository<MessageCowboySchedulableTaskConfig, String> {
 
     /**

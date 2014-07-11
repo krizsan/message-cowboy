@@ -17,7 +17,6 @@
 package se.ivankrizsan.messagecowboy.services.taskconfiguration;
 
 import java.util.List;
-
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 
 /**
@@ -29,17 +28,34 @@ import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulabl
 public interface TaskConfigurationService {
 
     /**
+     * Retrieves one named task configuration.
+     * 
+     * @return Task configuration with matching name, or null if none found.
+     */
+    abstract MessageCowboySchedulableTaskConfig find(String inName);
+
+    /**
      * Retrieves all stored task configurations.
      * 
      * @return All task configurations.
      */
-    public List<MessageCowboySchedulableTaskConfig> findAll();
+    abstract List<MessageCowboySchedulableTaskConfig> findAll();
 
     /**
-     * Retrieves all store task configurations that are enabled.
+     * Retrieves all stored task configurations that are enabled.
      * 
      * @return All enabled task configurations.
      */
-    public List<MessageCowboySchedulableTaskConfig> findAllEnabled();
+    abstract List<MessageCowboySchedulableTaskConfig> findAllEnabled();
 
+    /**
+     * Saves the supplied task configuration, replacing any existing task
+     * configuration with the same name.
+     * 
+     * @param inTaskConfig Task configuration to save.
+     * @return Saved task configuration. May differ from the original task
+     * configuration if modified when persisted.
+     */
+    abstract MessageCowboySchedulableTaskConfig save(
+        MessageCowboySchedulableTaskConfig inTaskConfig);
 }
