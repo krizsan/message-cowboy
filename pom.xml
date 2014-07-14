@@ -14,9 +14,7 @@
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/>.
 -->
-<project 
-    xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
@@ -35,12 +33,12 @@
             the Spring framework that is not newer than the one used here.
         -->
         <spring.data.jpa.version>1.4.5.RELEASE</spring.data.jpa.version>
-        
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <eclipsePluginVersion>2.8</eclipsePluginVersion>
-        
+
         <jdkName>JavaSE-1.7</jdkName>
         <jdk.version>1.7</jdk.version>
     </properties>
@@ -133,7 +131,7 @@
             <artifactId>spring-data-jpa</artifactId>
             <version>${spring.data.jpa.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
@@ -198,6 +196,7 @@
 
     <build>
         <plugins>
+            <!-- Specifies which Java version to use. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -207,6 +206,69 @@
                     <target>${jdk.version}</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
+            </plugin>
+            <!-- Copy all libraries needed to the libraries directory in the target directory. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.8</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/libraries</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Make the main JAR file executable and set folder for libraries. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>libraries/</classpathPrefix>
+                            <mainClass>se.ivankrizsan.messagecowboy.MessageCowboy</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <!--
+                Copy the configuration properties file and the directory containing
+                Mule configuration files to the target directory. -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}</directory>
+                                    <include>message-cowboy-configuration.properties</include>
+                                    <include>production-configurations/</include>
+                                </resource>
+                            </resources>
+                            <includeEmptyDirs>true</includeEmptyDirs>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
