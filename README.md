@@ -22,3 +22,19 @@ In addition, Message Cowboy will also run an embedded ActiveMQ JMS broker in its
 
 4) The database contains Message Cowboy scheduled task configurations and the scheduled tasks will be refreshed periodically by Message Cowboy based on the configuration in the database.
 In the default configuration, the database URL is: jdbc:hsqldb:hsql://localhost:9001/mc-db. The database user is "sa" and the password is "" (the empty string).
+
+To obtain a stand-alone version of the Message Cowboy, copy the following files and folders after having built the application using Maven:
+* message-cowboy-1.0.0-SNAPSHOT.jar
+Application JAR-file. The version number may be different.
+
+* message-cowboy-configuration.properties
+Message Cowboy configuration file.
+
+* production-configurations
+Directory containing Mule configuration files.
+
+* libraries
+Directory containing third-party libraries.
+
+The relationships between the different files and folders should be preserved, in order for Message Cowboy to be able to run correctly.
+If using the embedded database, Message Cowboy will create a directory named "MessageCowboyDatabase" containing the HSQLDB database files next to the application JAR-file.
