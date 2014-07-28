@@ -22,7 +22,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import se.ivankrizsan.messagecowboy.domain.entities.MoverMessage;
 import se.ivankrizsan.messagecowboy.domain.entities.TaskJob;
 import se.ivankrizsan.messagecowboy.services.transport.TransportService;
@@ -49,8 +48,7 @@ public class QuartzMuleTaskJob implements Job, TaskJob {
     /* Instance variable(s): */
 
     @Override
-    public void execute(
-        final JobExecutionContext inJobExecutionContext)
+    public void execute(final JobExecutionContext inJobExecutionContext)
         throws JobExecutionException {
         final String theJobName =
             inJobExecutionContext.getJobDetail().getKey().getName();
@@ -71,7 +69,7 @@ public class QuartzMuleTaskJob implements Job, TaskJob {
         } else {
             if (theMoverTaskConfig == null) {
                 LOGGER
-                    .error("Job data map did not contain mover task configuration");
+                .error("Job data map did not contain mover task configuration");
             }
             if (theTransportService == null) {
                 LOGGER.error("Job data map did not contain transport service");
@@ -91,8 +89,8 @@ public class QuartzMuleTaskJob implements Job, TaskJob {
         final JobExecutionContext inJobExecutionContext) {
         TransportService theTransportService = null;
         final Object theObject =
-            inJobExecutionContext.getJobDetail().getJobDataMap()
-                .get(TRANSPORT_SERVICE_JOB_DATA_KEY);
+            inJobExecutionContext.getJobDetail().getJobDataMap().get(
+                TRANSPORT_SERVICE_JOB_DATA_KEY);
         if (theObject != null && theObject instanceof TransportService) {
             theTransportService = (TransportService) theObject;
         }
@@ -111,8 +109,8 @@ public class QuartzMuleTaskJob implements Job, TaskJob {
         final JobExecutionContext inJobExecutionContext) {
         MessageCowboySchedulableTaskConfig theMoverTask = null;
         final Object theConfigObject =
-            inJobExecutionContext.getJobDetail().getJobDataMap()
-                .get(TASK_CONFIGURATION_JOB_DATA_KEY);
+            inJobExecutionContext.getJobDetail().getJobDataMap().get(
+                TASK_CONFIGURATION_JOB_DATA_KEY);
         if (theConfigObject != null
             && theConfigObject instanceof MessageCowboySchedulableTaskConfig) {
             theMoverTask = (MessageCowboySchedulableTaskConfig) theConfigObject;
@@ -136,12 +134,12 @@ public class QuartzMuleTaskJob implements Job, TaskJob {
         theInboundMessage =
             requestInboundMessage(inTransportService, inMoverTask);
 
-        LOGGER.debug("Message received from {}: {}",
-            inMoverTask.getInboundEndpointURI(), theInboundMessage);
+        LOGGER.debug("Message received from {}: {}", inMoverTask
+            .getInboundEndpointURI(), theInboundMessage);
 
         if (theInboundMessage != null) {
-            LOGGER.debug("Dispatching message to {}",
-                inMoverTask.getOutboundEndpointURI());
+            LOGGER.debug("Dispatching message to {}", inMoverTask
+                .getOutboundEndpointURI());
             dispatchOutboundMessage(inTransportService, inMoverTask,
                 theInboundMessage);
         }
@@ -150,7 +148,7 @@ public class QuartzMuleTaskJob implements Job, TaskJob {
     /**
      * Dispatches supplied outbound message using supplied transport service
      * to the outbound endpoint in supplied task configuration.
-     *  
+     *
      * @param inTransportService Transport service to dispatch message.
      * @param inMoverTask Task configuration holding dispatch parameters.
      * @param inOutboundMessage Message to dispatch.
@@ -160,11 +158,15 @@ public class QuartzMuleTaskJob implements Job, TaskJob {
         final TransportService inTransportService,
         final MessageCowboySchedulableTaskConfig inMoverTask,
         final MoverMessage<MuleMessage> inOutboundMessage)
-        throws JobExecutionException {
+            throws JobExecutionException {
         try {
-            inTransportService.dispatch(inOutboundMessage,
-                inMoverTask.getOutboundEndpointURI());
+            inTransportService.dispatch(inOutboundMessage, inMoverTask
+                .getOutboundEndpointURI());
         } catch (final TransportException theException) {
+            LOGGER.error("An error occurred when the task {} in group {} "
+                + "dispatched an outbound message", inMoverTask.getName(),
+                inMoverTask.getTaskGroupName());
+
             throw new JobExecutionException(theException);
         }
     }
@@ -174,7 +176,7 @@ public class QuartzMuleTaskJob implements Job, TaskJob {
      * endpoint in supplied task configuration.
      * The request will timeout after the amount of time specified in the
      * supplied task configuration.
-     * 
+     *
      * @param inTransportService Transport service to request message.
      * @param inMoverTask Task configuration holding request parameters.
      * @return Received message, or null if request timed out.
@@ -184,13 +186,17 @@ public class QuartzMuleTaskJob implements Job, TaskJob {
     protected MoverMessage<MuleMessage> requestInboundMessage(
         final TransportService inTransportService,
         final MessageCowboySchedulableTaskConfig inMoverTask)
-        throws JobExecutionException {
+            throws JobExecutionException {
         MoverMessage<MuleMessage> theInboundMessage;
         try {
             theInboundMessage =
                 inTransportService.receive(inMoverTask.getInboundEndpointURI(),
                     inMoverTask.getInboundTimeout());
         } catch (final TransportException theException) {
+            LOGGER.error("An error occurred when the task {} in group {} "
+                + "requested an inbound message", inMoverTask.getName(),
+                inMoverTask.getTaskGroupName());
+
             throw new JobExecutionException(theException);
         }
 
