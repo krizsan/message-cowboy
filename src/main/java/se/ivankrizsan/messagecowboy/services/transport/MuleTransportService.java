@@ -144,7 +144,7 @@ class MuleTransportService implements TransportService {
 
         if (theConfigRsrcChangedFlag) {
             LOGGER
-                .debug("Detected change in configuration resoureces, refreshing");
+                .debug("Detected change in configuration resources, refreshing");
 
             if (mMuleClient != null) {
                 mMuleClient.dispose();
@@ -165,7 +165,7 @@ class MuleTransportService implements TransportService {
             }
         } else {
             LOGGER
-                .debug("No changes in configuration resoureces, skips refresh");
+                .debug("No changes in configuration resources, skips refresh");
         }
     }
 

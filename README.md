@@ -38,3 +38,7 @@ Directory containing third-party libraries.
 
 The relationships between the different files and folders should be preserved, in order for Message Cowboy to be able to run correctly.
 If using the embedded database, Message Cowboy will create a directory named "MessageCowboyDatabase" containing the HSQLDB database files next to the application JAR-file.
+
+Please refer to the following links for detailed information on Message Cowboy:
+http://www.ivankrizsan.se/2014/07/22/message-cowboy-an-introduction/
+http://www.ivankrizsan.se/2014/08/04/using-message-cowboy/
