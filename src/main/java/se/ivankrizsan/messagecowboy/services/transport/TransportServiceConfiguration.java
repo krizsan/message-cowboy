@@ -19,6 +19,9 @@ package se.ivankrizsan.messagecowboy.services.transport;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,19 +35,36 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 public class TransportServiceConfiguration {
 
+	public static final String MULE_TRANSPORT_TYPE = "mule";
+	public static final String CAMEL_TRANSPORT_TYPE = "camel";
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(TransportServiceConfiguration.class);
+	
+	/** Possible values: {@value #MULE_TRANSPORT_TYPE}, {@value #CAMEL_TRANSPORT_TYPE}. */
+	@Value("${messagecowboy.transport}")
+	protected String mTransportType = MULE_TRANSPORT_TYPE;
+	
     /**
-     * Transport service, Mule implementation.
+     * Transport service implementation.
      * 
      * @return Service instance.
      */
     @Bean(initMethod = "start", destroyMethod = "stop")
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public TransportService transportService() {
-        final MuleTransportService theService = new MuleTransportService();
-        theService
-            .setConnectorsResourcesLocationPattern(muleTransportServiceConfigLocations());
-
-        return theService;
+    	LOGGER.info("messagecowboy.transport set to {}",mTransportType);
+    	
+    	if( CAMEL_TRANSPORT_TYPE.equals(mTransportType) ){
+    		final CamelTransportService theService = new CamelTransportService();
+    		theService.setConnectorsResourcesLocationPattern(camelTransportServiceConfigLocations());
+    		return theService;
+    	}else{
+    		final MuleTransportService theService = new MuleTransportService();
+            theService
+                .setConnectorsResourcesLocationPattern(muleTransportServiceConfigLocations());
+            return theService;
+    	}
+        
     }
 
     /**
@@ -62,5 +82,21 @@ public class TransportServiceConfiguration {
         final List<String> theLocationsList = new ArrayList<String>();
 
         return theLocationsList;
+    }
+    
+    /**
+     * Location of component configuration files used for transport in the 
+     * Camel implementation of the transport service.<br/>
+     * This bean should overridden and appropriate configuration locations 
+     * should be provided.
+     * 
+     * @return List of locations where the Camel transport service is to search
+     * for configuration files.
+     */
+    @Bean
+    @Scope
+    public List<String> camelTransportServiceConfigLocations(){
+    	final List<String> theLocationsList = new ArrayList<String>();
+    	return theLocationsList;
     }
 }

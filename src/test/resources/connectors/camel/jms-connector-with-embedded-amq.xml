@@ -1,0 +1,36 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camel="http://camel.apache.org/schema/spring"
+	xmlns:amq="http://activemq.apache.org/schema/core"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+         http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd
+         http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+	<amq:broker id="amq-broker" useJmx="false" persistent="false"
+		restartAllowed="false" useShutdownHook="true" startAsync="true">
+		<amq:destinationPolicy>
+			<amq:policyMap>
+				<amq:policyEntries>
+					<amq:policyEntry queue=">" producerFlowControl="true"
+						memoryLimit="1mb">
+						<amq:deadLetterStrategy>
+							<amq:individualDeadLetterStrategy
+								queuePrefix="DLQ." useQueueForQueueMessages="true" />
+						</amq:deadLetterStrategy>
+					</amq:policyEntry>
+				</amq:policyEntries>
+			</amq:policyMap>
+		</amq:destinationPolicy>
+		<amq:transportConnectors>
+			<amq:transportConnector uri="vm://amq-broker" />
+		</amq:transportConnectors>
+	</amq:broker>
+
+	<!-- Camel JMS test config -->
+	<bean id="jms" class="org.apache.activemq.camel.component.ActiveMQComponent">
+		<property name="brokerURL" value="vm://amq-broker" />
+	</bean>
+
+</beans>

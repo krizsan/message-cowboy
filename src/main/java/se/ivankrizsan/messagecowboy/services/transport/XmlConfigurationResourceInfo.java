@@ -17,14 +17,14 @@
 package se.ivankrizsan.messagecowboy.services.transport;
 
 /**
- * Holds information about one Mule configuration resource, such as name and a
+ * Holds information about one XML configuration resource, such as name and a
  * checksum of the resource.
  * Instances of this class are immutable.
  *
  * @author Ivan Krizsan
  */
-class MuleConfigurationResourceInfo implements
-    Comparable<MuleConfigurationResourceInfo> {
+class XmlConfigurationResourceInfo implements
+    Comparable<XmlConfigurationResourceInfo> {
     /* Constant(s): */
 
     /* Instance variable(s): */
@@ -38,7 +38,7 @@ class MuleConfigurationResourceInfo implements
      * @param inResourceName Name of configuration resource.
      * @param inResourceChecksum Checksum of configuration resource.
      */
-    public MuleConfigurationResourceInfo(final String inResourceName,
+    public XmlConfigurationResourceInfo(final String inResourceName,
         final String inResourceChecksum) {
         if (inResourceName == null || inResourceChecksum == null) {
             throw new IllegalArgumentException(
@@ -83,8 +83,8 @@ class MuleConfigurationResourceInfo implements
         if (getClass() != inObjectToCompare.getClass()) {
             return false;
         }
-        MuleConfigurationResourceInfo theOtherConfigRsrscInfo =
-            (MuleConfigurationResourceInfo) inObjectToCompare;
+        XmlConfigurationResourceInfo theOtherConfigRsrscInfo =
+            (XmlConfigurationResourceInfo) inObjectToCompare;
         if (mResourceChecksum == null) {
             if (theOtherConfigRsrscInfo.mResourceChecksum != null) {
                 return false;
@@ -109,7 +109,7 @@ class MuleConfigurationResourceInfo implements
      */
     @Override
     public int compareTo(
-        final MuleConfigurationResourceInfo inOtherConfigRsrcInfo) {
+        final XmlConfigurationResourceInfo inOtherConfigRsrcInfo) {
         final int theCompareResult =
             mResourceName.compareTo(inOtherConfigRsrcInfo.getResourceName());
         return theCompareResult;

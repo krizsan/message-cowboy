@@ -30,27 +30,27 @@ import org.slf4j.LoggerFactory;
 
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MuleMoverMessage;
-import se.ivankrizsan.messagecowboy.domain.entities.impl.QuartzMuleTaskJob;
+import se.ivankrizsan.messagecowboy.domain.entities.impl.QuartzTaskJob;
 import se.ivankrizsan.messagecowboy.services.transport.TransportService;
 import se.ivankrizsan.messagecowboy.services.transport.exceptions.TransportException;
 import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
 
 /**
- * Tests the {@link QuartzMuleTaskJob} class.
+ * Tests the {@link QuartzTaskJob} class.
  *
  * @author Ivan Krizsan
  */
-public class QuartzMuleTaskJobTest extends AbstractTestBaseClass {
+public class QuartzTaskJobTest extends AbstractTestBaseClass {
     /* Constant(s): */
     static final Logger LOGGER = LoggerFactory
-        .getLogger(QuartzMuleTaskJobTest.class);
+        .getLogger(QuartzTaskJobTest.class);
 
     /* Instance variable(s): */
     private TransportService mTransportService;
     /** Contains configuration for test-task. */
     private MessageCowboySchedulableTaskConfig mMoverTask;
     /** Task job under test. */
-    private QuartzMuleTaskJob mTaskJobUnderTest;
+    private QuartzTaskJob mTaskJobUnderTest;
     /** Quartz job execution context used in tests. */
     private JobExecutionContext mJobExecContext;
 
@@ -69,7 +69,7 @@ public class QuartzMuleTaskJobTest extends AbstractTestBaseClass {
 
         mMoverTask =
             createFileMoverTask("/SomeInputDir/", "/SomeDestinationDir/");
-        mTaskJobUnderTest = new QuartzMuleTaskJob();
+        mTaskJobUnderTest = new QuartzTaskJob();
         mJobExecContext = createJobExecutionContextWithMoverTask(mMoverTask);
     }
 
@@ -102,7 +102,7 @@ public class QuartzMuleTaskJobTest extends AbstractTestBaseClass {
 
     /**
      * Creates a Quartz job execution context configured to be executed by a
-     * {@code QuartzMuleTaskJob} with supplied mover task.
+     * {@code QuartzTaskJob} with supplied mover task.
      *
      * @param inMoverTask Mover task to insert into the job execution context.
      * @return Quartz job execution context.
@@ -116,9 +116,9 @@ public class QuartzMuleTaskJobTest extends AbstractTestBaseClass {
         final JobDetail theJobDetail = Mockito.mock(JobDetail.class);
         Mockito.when(theJobDetail.getKey()).thenReturn(theJobKey);
         final JobDataMap theJobDataMap = new JobDataMap();
-        theJobDataMap.put(QuartzMuleTaskJob.TASK_CONFIGURATION_JOB_DATA_KEY,
+        theJobDataMap.put(QuartzTaskJob.TASK_CONFIGURATION_JOB_DATA_KEY,
             inMoverTask);
-        theJobDataMap.put(QuartzMuleTaskJob.TRANSPORT_SERVICE_JOB_DATA_KEY,
+        theJobDataMap.put(QuartzTaskJob.TRANSPORT_SERVICE_JOB_DATA_KEY,
             mTransportService);
         Mockito.when(theJobDetail.getJobDataMap()).thenReturn(theJobDataMap);
 

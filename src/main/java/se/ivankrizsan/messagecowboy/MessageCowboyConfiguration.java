@@ -55,7 +55,10 @@ public class MessageCowboyConfiguration {
     @Bean
     public static PropertySourcesPlaceholderConfigurer
         propertySourcesPlaceholderConfigurer() {
-        return new PropertySourcesPlaceholderConfigurer();
+        PropertySourcesPlaceholderConfigurer thePropertyPlaceholderConfigurer 
+        	= new PropertySourcesPlaceholderConfigurer();
+        thePropertyPlaceholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
+        return thePropertyPlaceholderConfigurer;
     }
 
     /**
@@ -76,5 +79,24 @@ public class MessageCowboyConfiguration {
         theLocationsList
             .add("file:production-configurations/transport-service-configurations/*.xml");
         return theLocationsList;
+    }
+    
+    /**
+     * Override.
+     * Location of component configuration files used for transport in the 
+     * Camel implementation of the transport service.<br/>
+     * These are the values to be used in a production environment.
+     * 
+     * @return List of locations where the Camel transport service is to search
+     * for configuration files.
+     */
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    public List<String> camelTransportServiceConfigLocations(){
+    	final List<String> theLocationsList = new ArrayList<String>();
+    	theLocationsList.add("file:production-configurations/camel/*.xml");
+//        theLocationsList
+//            .add("file:production-configurations/transport-service-configurations/*.xml");
+        return theLocationsList;	
     }
 }

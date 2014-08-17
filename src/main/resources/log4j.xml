@@ -24,6 +24,10 @@
         <level value="INFO"/>
     </logger>
     
+    <logger name="org.apache.camel">
+        <level value="INFO"/>
+    </logger>
+    
     <logger name="se.ivankrizsan.messagecowboy">
         <level value="DEBUG" />
     </logger>
