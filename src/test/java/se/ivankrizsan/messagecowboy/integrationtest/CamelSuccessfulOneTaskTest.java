@@ -1,4 +1,3 @@
-package se.ivankrizsan.messagecowboy.integrationtest;
 /*
  * This file is part of Message Cowboy.
  * Copyright 2014 Ivan A Krizsan. All Rights Reserved.
@@ -15,6 +14,7 @@ package se.ivankrizsan.messagecowboy.integrationtest;
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
+package se.ivankrizsan.messagecowboy.integrationtest;
 
 import java.io.File;
 
