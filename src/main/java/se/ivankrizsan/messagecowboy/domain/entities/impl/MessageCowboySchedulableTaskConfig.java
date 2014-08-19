@@ -132,7 +132,7 @@ public class MessageCowboySchedulableTaskConfig implements
 
     @Override
     public Class<? extends TaskJob> getTaskJobType() {
-        return QuartzMuleTaskJob.class;
+        return QuartzTaskJob.class;
     }
 
     @Override

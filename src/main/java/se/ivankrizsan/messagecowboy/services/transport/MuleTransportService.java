@@ -17,21 +17,17 @@
 package se.ivankrizsan.messagecowboy.services.transport;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import org.apache.commons.codec.digest.DigestUtils;
+
 import org.mule.api.MuleContext;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
 import org.mule.module.client.MuleClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
+
 import se.ivankrizsan.messagecowboy.domain.entities.MoverMessage;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MuleMoverMessage;
 import se.ivankrizsan.messagecowboy.services.transport.exceptions.TransportException;
@@ -55,27 +51,15 @@ import se.ivankrizsan.messagecowboy.services.transport.exceptions.TransportExcep
  * @author Ivan Krizsan
  */
 @Service
-class MuleTransportService implements TransportService {
+class MuleTransportService extends AbstractXmlConfigurerdTransportService {
     /* Constant(s): */
     /** Class logger. */
-    private static final Logger LOGGER = LoggerFactory
+    static final Logger LOGGER = LoggerFactory
         .getLogger(MuleTransportService.class);
 
     /* Instance variable(s): */
     /** Mule client used to transfer messages. */
     protected MuleClient mMuleClient;
-    /** Information about currently used Mule configuration resources. */
-    protected List<MuleConfigurationResourceInfo> mConfigurationResourceInfos =
-        new ArrayList<MuleConfigurationResourceInfo>();
-
-    /**
-     * Location patterns specifying the locations of Mule configuration
-     * files used by the transport service.
-     * @see PathMatchingResourcePatternResolver for information on how to
-     * construct such a path.
-     */
-    protected List<String> mConfigResourcesLocationPatterns;
-
     @SuppressWarnings("rawtypes")
     @Override
     public synchronized void dispatch(final MoverMessage inMessage,
@@ -170,46 +154,6 @@ class MuleTransportService implements TransportService {
     }
 
     /**
-     * Determines whether Mule configuration resources have changed since last
-     * time the configuration resources were read.
-     * If configuration resources has changed, then the current configuration
-     * resource information list will be updated.
-     *
-     * @throws IOException If error occurs accessing configuration resource.
-     */
-    protected boolean hasConfigurationResourceBeenModified() throws IOException {
-        /* Get configuration resource information for (new) resources. */
-        final List<MuleConfigurationResourceInfo> theNewConfigRsrscInfos =
-            retrieveMuleConfigResourceInfos();
-        Collections.sort(theNewConfigRsrscInfos);
-        Collections.sort(mConfigurationResourceInfos);
-
-        /* Determine if there are any changes to configuration resources. */
-        boolean theConfigRsrcChangedFlag = false;
-        if (mConfigurationResourceInfos.size() != theNewConfigRsrscInfos.size()) {
-            /* Different number of configuration resources. */
-            theConfigRsrcChangedFlag = true;
-        } else {
-            /* Check each configuration resource for modifications. */
-            for (int i = 0; i < theNewConfigRsrscInfos.size(); i++) {
-                final MuleConfigurationResourceInfo theNewConfigRsrcInfo =
-                    theNewConfigRsrscInfos.get(i);
-                final MuleConfigurationResourceInfo theOldConfigRsrcInfo =
-                    mConfigurationResourceInfos.get(i);
-                if (!theOldConfigRsrcInfo.equals(theNewConfigRsrcInfo)) {
-                    theConfigRsrcChangedFlag = true;
-                }
-            }
-        }
-
-        if (theConfigRsrcChangedFlag) {
-            mConfigurationResourceInfos = theNewConfigRsrscInfos;
-        }
-
-        return theConfigRsrcChangedFlag;
-    }
-
-    /**
      * Builds a string containing the Mule configuration resources the transport
      * service is to be configured with.
      *
@@ -244,78 +188,7 @@ class MuleTransportService implements TransportService {
         }
         return theMuleConfigResource.toString();
     }
-
-    /**
-     * Retrieves configuration resource information for the currently configured
-     * Mule configuration resources.
-     *
-     * @return List of configuration resource information.
-     * @throws IOException If error occurs discovering or accessing configuration resource.
-     */
-    protected List<MuleConfigurationResourceInfo>
-        retrieveMuleConfigResourceInfos() throws IOException {
-        final PathMatchingResourcePatternResolver theConnectorsResolver =
-            new PathMatchingResourcePatternResolver();
-        final List<MuleConfigurationResourceInfo> theConfigRsrcInfos =
-            new ArrayList<MuleConfigurationResourceInfo>();
-
-        for (String theConfigRsrcsLocationPattern : mConfigResourcesLocationPatterns) {
-            final Resource[] theConnectorsConfigurations =
-                theConnectorsResolver
-                    .getResources(theConfigRsrcsLocationPattern);
-
-            LOGGER.debug(
-                "Found {} connector configuration files using the pattern {}",
-                theConnectorsConfigurations.length,
-                theConfigRsrcsLocationPattern);
-
-            if (theConnectorsConfigurations.length > 0) {
-                for (Resource theResource : theConnectorsConfigurations) {
-
-                    final byte[] theConfigRsrcContents =
-                        FileCopyUtils.copyToByteArray(theResource
-                            .getInputStream());
-                    final String theConfigRsrcName = theResource.getFilename();
-                    final String theConfigRsrcChecksum =
-                        DigestUtils.md5Hex(theConfigRsrcContents);
-
-                    final MuleConfigurationResourceInfo theConfigRsrcInfo =
-                        new MuleConfigurationResourceInfo(theConfigRsrcName,
-                            theConfigRsrcChecksum);
-                    theConfigRsrcInfos.add(theConfigRsrcInfo);
-                }
-            }
-        }
-        return theConfigRsrcInfos;
-    }
-
-    /**
-     * Retrieves the configuration resource location patterns that specifies where
-     * to look for connector definition resources (commonly files).
-     *
-     * @return Configuration resource location patterns.
-     */
-    public List<String> getConnectorsResourcesLocationPattern() {
-        return mConfigResourcesLocationPatterns;
-    }
-
-    /**
-     * Sets the configuration resource location patterns that specifies where
-     * to look for connector definition resources (commonly files).
-     *
-     * @param inConfigurationResourceLocationPatterns Configuration resource
-     * location patterns.
-     * Please refer to the documentation of the Spring
-     * {@code PathMatchingResourcePatternResolver} class for information on
-     * location pattern format.
-     */
-    @Required
-    public void setConnectorsResourcesLocationPattern(
-        final List<String> inConfigurationResourceLocationPatterns) {
-        mConfigResourcesLocationPatterns =
-            inConfigurationResourceLocationPatterns;
-    }
-
+    
     /**
      * Retrieves the Mule context.<br/>
      * For testing purposes only.

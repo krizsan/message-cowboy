@@ -16,12 +16,12 @@
  */
 package se.ivankrizsan.messagecowboy.domain.entities.impl;
 
-import org.mule.api.MuleMessage;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import se.ivankrizsan.messagecowboy.domain.entities.MoverMessage;
 import se.ivankrizsan.messagecowboy.domain.entities.TaskJob;
 import se.ivankrizsan.messagecowboy.services.transport.TransportService;
@@ -30,15 +30,15 @@ import se.ivankrizsan.messagecowboy.services.transport.exceptions.TransportExcep
 /**
  * Implements a task job that moves messages from a source endpoint to a
  * destination endpoint.<br/>
- * The task job is implemented to use the Quartz scheduler and Mule.
+ * The task job is implemented to use the Quartz scheduler and available {@link TransportService}.
  *
  * @author Ivan Krizsan
  */
-public class QuartzMuleTaskJob implements Job, TaskJob {
+public class QuartzTaskJob implements Job, TaskJob {
     /* Constant(s): */
     /** Class logger. */
     private static final Logger LOGGER = LoggerFactory
-        .getLogger(QuartzMuleTaskJob.class);
+        .getLogger(QuartzTaskJob.class);
     /** Key used to locate task configuration in Quartz job data map. */
     public static final String TASK_CONFIGURATION_JOB_DATA_KEY = "qMoverTask";
     /** Key used to locate transport service in Quartz job data map. */
@@ -127,7 +127,8 @@ public class QuartzMuleTaskJob implements Job, TaskJob {
     protected void executeMoverTaskJob(
         final MessageCowboySchedulableTaskConfig inMoverTask,
         final TransportService inTransportService) throws JobExecutionException {
-        MoverMessage<MuleMessage> theInboundMessage;
+        @SuppressWarnings("rawtypes")
+		MoverMessage theInboundMessage;
 
         LOGGER.debug("Executing mover task job {}", inMoverTask.getName());
 
@@ -157,7 +158,7 @@ public class QuartzMuleTaskJob implements Job, TaskJob {
     protected void dispatchOutboundMessage(
         final TransportService inTransportService,
         final MessageCowboySchedulableTaskConfig inMoverTask,
-        final MoverMessage<MuleMessage> inOutboundMessage)
+        @SuppressWarnings("rawtypes") final MoverMessage inOutboundMessage)
             throws JobExecutionException {
         try {
             inTransportService.dispatch(inOutboundMessage, inMoverTask
@@ -182,12 +183,12 @@ public class QuartzMuleTaskJob implements Job, TaskJob {
      * @return Received message, or null if request timed out.
      * @throws JobExecutionException If error occurs receiving message.
      */
-    @SuppressWarnings("unchecked")
-    protected MoverMessage<MuleMessage> requestInboundMessage(
+    @SuppressWarnings("rawtypes")
+    protected MoverMessage requestInboundMessage(
         final TransportService inTransportService,
         final MessageCowboySchedulableTaskConfig inMoverTask)
             throws JobExecutionException {
-        MoverMessage<MuleMessage> theInboundMessage;
+        MoverMessage theInboundMessage;
         try {
             theInboundMessage =
                 inTransportService.receive(inMoverTask.getInboundEndpointURI(),

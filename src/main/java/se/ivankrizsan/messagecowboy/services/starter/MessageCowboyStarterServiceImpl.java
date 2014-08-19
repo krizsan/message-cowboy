@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 
 import se.ivankrizsan.messagecowboy.domain.entities.SchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
-import se.ivankrizsan.messagecowboy.domain.entities.impl.QuartzMuleTaskJob;
+import se.ivankrizsan.messagecowboy.domain.entities.impl.QuartzTaskJob;
 import se.ivankrizsan.messagecowboy.domain.valueobjects.TaskKey;
 import se.ivankrizsan.messagecowboy.services.scheduling.SchedulingService;
 import se.ivankrizsan.messagecowboy.services.taskconfiguration.TaskConfigurationService;
@@ -152,10 +152,10 @@ class MessageCowboyStarterServiceImpl implements MessageCowboyStarterService {
                 final Map<String, Object> theJobDataMap =
                     new HashMap<String, Object>();
                 theJobDataMap.put(
-                    QuartzMuleTaskJob.TASK_CONFIGURATION_JOB_DATA_KEY,
+                    QuartzTaskJob.TASK_CONFIGURATION_JOB_DATA_KEY,
                     theTaskConfiguration);
                 theJobDataMap.put(
-                    QuartzMuleTaskJob.TRANSPORT_SERVICE_JOB_DATA_KEY,
+                    QuartzTaskJob.TRANSPORT_SERVICE_JOB_DATA_KEY,
                     mTransportService);
 
                 mSchedulingService.scheduleTask(theTaskConfiguration,
