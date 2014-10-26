@@ -20,13 +20,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Service;
-
 import se.ivankrizsan.messagecowboy.domain.entities.SchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.QuartzTaskJob;
@@ -149,26 +147,33 @@ class MessageCowboyStarterServiceImpl implements MessageCowboyStarterService {
         /* Schedule all enabled tasks. */
         for (SchedulableTaskConfig theTaskConfiguration : theTaskConfigurations) {
             if (theTaskConfiguration.getTaskEnabledFlag()) {
+                /*
+                 * Create job data map and fill it with the data and
+                 * references to the services needed when the task is
+                 * executed.
+                 */
                 final Map<String, Object> theJobDataMap =
                     new HashMap<String, Object>();
                 theJobDataMap.put(
                     QuartzTaskJob.TASK_CONFIGURATION_JOB_DATA_KEY,
                     theTaskConfiguration);
-                theJobDataMap.put(
-                    QuartzTaskJob.TRANSPORT_SERVICE_JOB_DATA_KEY,
+                theJobDataMap.put(QuartzTaskJob.TRANSPORT_SERVICE_JOB_DATA_KEY,
                     mTransportService);
+                theJobDataMap.put(
+                    QuartzTaskJob.TASK_CONFIGURATION_SERVICE_JOB_DATA_KEY,
+                    mTaskConfigurationService);
 
                 mSchedulingService.scheduleTask(theTaskConfiguration,
                     theJobDataMap);
 
                 LOGGER.debug("Scheduled task {} in group {}",
-                    theTaskConfiguration.getName(),
-                    theTaskConfiguration.getTaskGroupName());
+                    theTaskConfiguration.getName(), theTaskConfiguration
+                        .getTaskGroupName());
             } else {
                 LOGGER.debug(
                     "Task {} in group {} is disabled and thus not scheduled",
-                    theTaskConfiguration.getName(),
-                    theTaskConfiguration.getTaskGroupName());
+                    theTaskConfiguration.getName(), theTaskConfiguration
+                        .getTaskGroupName());
             }
         }
 

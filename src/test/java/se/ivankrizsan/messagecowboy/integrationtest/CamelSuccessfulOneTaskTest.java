@@ -54,7 +54,6 @@ public class CamelSuccessfulOneTaskTest extends AbstractTestBaseClass {
 	private TaskConfigurationService mTaskConfigurationService;
 	@Autowired
 	private MessageCowboyStarterService mMessageCowboyService;
-	
 	@Rule
 	public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
 	
@@ -91,8 +90,10 @@ public class CamelSuccessfulOneTaskTest extends AbstractTestBaseClass {
         final String theInputDirPath = theInputFolder.getAbsolutePath();
         final String theDestDirPath = mTestDestinationDirectory.getAbsolutePath();
 
-        // Using non standard file component prefix - to verify that
-        // the component was configured from .xml file.
+        /*
+         * Using non standard file component prefix - to verify that
+         * the component was configured from .xml file.
+         */
         String theInboundFileEndpointUri = "phile://" + theInputDirPath;
         String theOutboundFileEndpointUri = "phile://" + theDestDirPath;
 

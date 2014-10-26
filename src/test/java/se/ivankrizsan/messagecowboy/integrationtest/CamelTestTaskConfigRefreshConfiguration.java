@@ -19,8 +19,6 @@ package se.ivankrizsan.messagecowboy.integrationtest;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.spring.javaconfig.SingleRouteCamelConfiguration;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

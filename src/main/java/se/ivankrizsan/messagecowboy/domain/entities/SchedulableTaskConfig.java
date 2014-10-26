@@ -18,6 +18,9 @@ package se.ivankrizsan.messagecowboy.domain.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+import se.ivankrizsan.messagecowboy.domain.valueobjects.TaskExecutionStatus;
+import se.ivankrizsan.messagecowboy.domain.valueobjects.TransportProperty;
 
 /**
  * Holds the configuration for a schedulable task.<br/>
@@ -39,8 +42,7 @@ public interface SchedulableTaskConfig extends Serializable {
      *
      * @param inName New task name.
      */
-    abstract void setName(
-        String inName);
+    abstract void setName(String inName);
 
     /**
      * Retrieves the name of the group, if any, the task belongs to.
@@ -54,8 +56,7 @@ public interface SchedulableTaskConfig extends Serializable {
      *
      * @param inTaskGroupName Task group name, or null if the task does not belong to a group.
      */
-    abstract void setTaskGroupName(
-        String inTaskGroupName);
+    abstract void setTaskGroupName(String inTaskGroupName);
 
     /**
      * Retrieves the cron expression that determines when the task will run.
@@ -69,8 +70,7 @@ public interface SchedulableTaskConfig extends Serializable {
      *
      * @param inCronExpression Cron expression.
      */
-    abstract void setCronExpression(
-        String inCronExpression);
+    abstract void setCronExpression(String inCronExpression);
 
     /**
      * Retrieves the optional start date after which the task will be scheduled
@@ -88,8 +88,7 @@ public interface SchedulableTaskConfig extends Serializable {
      * @param inStartDate Task start date, or null if task is to start
      * immediately when scheduled.
      */
-    abstract void setStartDate(
-        Date inStartDate);
+    abstract void setStartDate(Date inStartDate);
 
     /**
      * Retrieves the optional end date after which the task no longer will be
@@ -107,8 +106,7 @@ public interface SchedulableTaskConfig extends Serializable {
      * @param inEndDate Task end date, or null if task is to be scheduled for
      * execution indefinitely.
      */
-    abstract void setEndDate(
-        Date inEndDate);
+    abstract void setEndDate(Date inEndDate);
 
     /**
      * Retrieves the flag indicating whether the task is enabled.<br/>
@@ -124,8 +122,7 @@ public interface SchedulableTaskConfig extends Serializable {
      *
      * @param inTaskEnabledFlag Task enabled flag.
      */
-    abstract void setTaskEnabledFlag(
-        final boolean inTaskEnabledFlag);
+    abstract void setTaskEnabledFlag(final boolean inTaskEnabledFlag);
 
     /**
      * Retrieves the type of the job to be executed at the interval specified
@@ -134,4 +131,45 @@ public interface SchedulableTaskConfig extends Serializable {
      * @return Task job type.
      */
     abstract Class<? extends TaskJob> getTaskJobType();
+
+    /**
+     * Retrieves the transport properties of the task.
+     *
+     * @return Task's transport properties.
+     */
+    abstract List<TransportProperty> getTransportProperties();
+
+    /**
+     * Sets the transport properties of the task.
+     * May not be null.
+     *
+     * @param inTransportProperties Transport properties of the task.
+     */
+    abstract void setTransportProperties(
+        final List<TransportProperty> inTransportProperties);
+
+    /**
+     * Retrieves the task execution status objects related to the task.
+     *
+     * @return Task's execution status objects. Empty collection if
+     * task has never been executed.
+     */
+    abstract List<TaskExecutionStatus> getTaskExecutionStatuses();
+
+    /**
+     * Sets the task execution status objects related to the task.
+     *
+     * @param inTaskExecutionStatuses Task's execution status objects.
+     */
+    abstract void setTaskExecutionStatuses(
+        List<TaskExecutionStatus> inTaskExecutionStatuses);
+
+    /**
+     * Adds the supplied task execution status object to those associated
+     * with the task.
+     *
+     * @param inNewTaskExecutionStatus Task execution status to add.
+     */
+    abstract void addTaskExecutionStatus(
+        TaskExecutionStatus inNewTaskExecutionStatus);
 }

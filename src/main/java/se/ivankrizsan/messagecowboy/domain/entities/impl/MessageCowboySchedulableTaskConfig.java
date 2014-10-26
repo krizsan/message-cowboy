@@ -16,17 +16,23 @@
  */
 package se.ivankrizsan.messagecowboy.domain.entities.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import se.ivankrizsan.messagecowboy.domain.entities.SchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.domain.entities.TaskJob;
+import se.ivankrizsan.messagecowboy.domain.valueobjects.TaskExecutionStatus;
+import se.ivankrizsan.messagecowboy.domain.valueobjects.TransportProperty;
 
 /**
  * A schedulable task that contains information specific to a message move
@@ -36,8 +42,7 @@ import se.ivankrizsan.messagecowboy.domain.entities.TaskJob;
  */
 @Entity(name = "MessageCowboySchedulableTaskConfig")
 @Table(name = "SchedulableTaskConfigurations")
-public class MessageCowboySchedulableTaskConfig implements
-    SchedulableTaskConfig {
+public class MessageCowboySchedulableTaskConfig implements SchedulableTaskConfig {
 
     /* Constant(s): */
     /** Serialization version id of this class. */
@@ -80,6 +85,15 @@ public class MessageCowboySchedulableTaskConfig implements
     /** Flag indicating whether task is enabled. */
     @Column(nullable = false)
     protected boolean taskEnabledFlag;
+    /**
+     * Properties that will enclosed when receiving and dispatching messages
+     * for this task.
+     */
+    @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY)
+    protected List<TransportProperty> mTransportProperties = new ArrayList<TransportProperty>();;
+    /** Status reports for executions of the executions of the scheduled task. */
+    @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY)
+    protected List<TaskExecutionStatus> mTaskExecutionStatuses = new ArrayList<TaskExecutionStatus>();
 
     @Override
     public String getName() {
@@ -87,8 +101,7 @@ public class MessageCowboySchedulableTaskConfig implements
     }
 
     @Override
-    public void setName(
-        final String inName) {
+    public void setName(final String inName) {
         name = inName;
     }
 
@@ -98,8 +111,7 @@ public class MessageCowboySchedulableTaskConfig implements
     }
 
     @Override
-    public void setTaskGroupName(
-        final String inTaskGroupName) {
+    public void setTaskGroupName(final String inTaskGroupName) {
         taskGroupName = inTaskGroupName;
     }
 
@@ -107,8 +119,7 @@ public class MessageCowboySchedulableTaskConfig implements
         return inboundEndpointURI;
     }
 
-    public void setInboundEndpointURI(
-        final String inInboundEndpointURI) {
+    public void setInboundEndpointURI(final String inInboundEndpointURI) {
         inboundEndpointURI = inInboundEndpointURI;
     }
 
@@ -116,8 +127,7 @@ public class MessageCowboySchedulableTaskConfig implements
         return inboundTimeout;
     }
 
-    public void setInboundTimeout(
-        final long inInboundTimeout) {
+    public void setInboundTimeout(final long inInboundTimeout) {
         inboundTimeout = inInboundTimeout;
     }
 
@@ -125,8 +135,7 @@ public class MessageCowboySchedulableTaskConfig implements
         return outboundEndpointURI;
     }
 
-    public void setOutboundEndpoint(
-        final String inOutboundEndpointURI) {
+    public void setOutboundEndpoint(final String inOutboundEndpointURI) {
         outboundEndpointURI = inOutboundEndpointURI;
     }
 
@@ -141,8 +150,7 @@ public class MessageCowboySchedulableTaskConfig implements
     }
 
     @Override
-    public void setCronExpression(
-        final String inCronExpression) {
+    public void setCronExpression(final String inCronExpression) {
         cronExpression = inCronExpression;
     }
 
@@ -152,8 +160,7 @@ public class MessageCowboySchedulableTaskConfig implements
     }
 
     @Override
-    public void setStartDate(
-        final Date inStartDate) {
+    public void setStartDate(final Date inStartDate) {
         startDate = (Date) (inStartDate == null ? null : inStartDate.clone());
     }
 
@@ -163,8 +170,7 @@ public class MessageCowboySchedulableTaskConfig implements
     }
 
     @Override
-    public void setEndDate(
-        final Date inEndDate) {
+    public void setEndDate(final Date inEndDate) {
         endDate = (Date) (inEndDate == null ? null : inEndDate.clone());
     }
 
@@ -174,23 +180,44 @@ public class MessageCowboySchedulableTaskConfig implements
     }
 
     @Override
-    public void setTaskEnabledFlag(
-        final boolean inTaskEnabledFlag) {
+    public void setTaskEnabledFlag(final boolean inTaskEnabledFlag) {
         taskEnabledFlag = inTaskEnabledFlag;
     }
 
     @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("MessageCowboySchedulableTaskConfig [name=")
-            .append(name).append(", inboundEndpointURI=")
-            .append(inboundEndpointURI).append(", outboundEndpointURI=")
-            .append(outboundEndpointURI).append(", taskGroupName=")
-            .append(taskGroupName).append(", inboundTimeout=")
-            .append(inboundTimeout).append(", cronExpression=")
-            .append(cronExpression).append(", startDate=").append(startDate)
-            .append(", endDate=").append(endDate).append(", taskEnabledFlag=")
-            .append(taskEnabledFlag).append("]");
-        return builder.toString();
+    public List<TransportProperty> getTransportProperties() {
+        return mTransportProperties;
+    }
+
+    @Override
+    public void setTransportProperties(final List<TransportProperty> inTransportProperties) {
+        if (inTransportProperties == null) {
+            throw new IllegalArgumentException("Transport properties may not be null");
+        }
+        mTransportProperties = inTransportProperties;
+    }
+
+    @Override
+    public List<TaskExecutionStatus> getTaskExecutionStatuses() {
+        return mTaskExecutionStatuses;
+    }
+
+    @Override
+    public void setTaskExecutionStatuses(final List<TaskExecutionStatus> inTaskExecutionStatuses) {
+        if (inTaskExecutionStatuses == null) {
+            throw new IllegalArgumentException("Task execution statuses may not be null");
+        }
+        mTaskExecutionStatuses = inTaskExecutionStatuses;
+    }
+
+    @Override
+    public void addTaskExecutionStatus(final TaskExecutionStatus inTaskStatus) {
+        mTaskExecutionStatuses.add(inTaskStatus);
+    }
+
+    public TaskExecutionStatus getLastExecutionStatus() {
+        final TaskExecutionStatus theTaskExecutionStatus =
+            mTaskExecutionStatuses.get(mTaskExecutionStatuses.size() - 1);
+        return theTaskExecutionStatus;
     }
 }

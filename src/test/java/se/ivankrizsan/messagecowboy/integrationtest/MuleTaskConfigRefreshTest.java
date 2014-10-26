@@ -18,6 +18,7 @@ package se.ivankrizsan.messagecowboy.integrationtest;
 
 import java.io.File;
 import java.util.Date;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +28,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.services.starter.MessageCowboyStarterService;
 import se.ivankrizsan.messagecowboy.services.taskconfiguration.TaskConfigurationService;
@@ -34,14 +36,15 @@ import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
 
 /**
  * Integration test testing startup, scheduling and execution of one task which
- * configuration is modified between startup and the execution of the task.
+ * configuration is modified between startup and the execution of the task
+ * with the Mule transport service.
  *
  * @author Ivan Krizsan
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { TestTaskConfigRefreshConfiguration.class })
+@ContextConfiguration(classes = { MuleTaskConfigRefreshTestConfiguration.class })
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class TaskConfigRefreshTest extends AbstractTestBaseClass {
+public class MuleTaskConfigRefreshTest extends AbstractTestBaseClass {
     /* Constant(s): */
     private final static String TEST_TASK_CONFIG_NAME = "FileToFileTwo";
 
@@ -71,7 +74,7 @@ public class TaskConfigRefreshTest extends AbstractTestBaseClass {
             "file://no-such-directory/?connector=nonStreamingFileConnectorInbound";
         final String theOutboundFileEndpointUri =
             "file://" + theDestDirPath
-                + "?connector=nonStreamingFileConnectorOutbound";
+            + "?connector=nonStreamingFileConnectorOutbound";
 
         /* Insert task configuration into database. */
         MessageCowboySchedulableTaskConfig theTask =
@@ -93,7 +96,7 @@ public class TaskConfigRefreshTest extends AbstractTestBaseClass {
 
     /**
      * Cleans up after each test.
-     * 
+     *
      * @throws Exception If error occurs.
      */
     @After
@@ -105,7 +108,7 @@ public class TaskConfigRefreshTest extends AbstractTestBaseClass {
     /**
      * Tests modifying the task configuration before moving the file is
      * performed.
-     * 
+     *
      * @throws Exception If error occurs during test. Indicates test failure.
      */
     @Test
@@ -117,7 +120,7 @@ public class TaskConfigRefreshTest extends AbstractTestBaseClass {
             mTestFile.getAbsolutePath().replaceAll("\\" + File.separator, "/");
         final String theInboundFileEndpointUri =
             "file://" + theInputDirPath
-                + "?connector=nonStreamingFileConnectorInbound";
+            + "?connector=nonStreamingFileConnectorInbound";
         theTaskConfigToModify.setInboundEndpointURI(theInboundFileEndpointUri);
         mTaskConfigurationService.save(theTaskConfigToModify);
 

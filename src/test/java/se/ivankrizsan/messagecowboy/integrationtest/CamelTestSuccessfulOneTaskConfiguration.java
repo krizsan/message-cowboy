@@ -29,7 +29,7 @@ import se.ivankrizsan.messagecowboy.MessageCowboyConfiguration;
 import se.ivankrizsan.messagecowboy.testconfig.PersistenceTestConfiguration;
 
 /**
- * Spring configuration class for the {@code SuccessfulOneTaskTest}
+ * Spring configuration class for the {@code CamelSuccessfulOneTaskTest}
  * integration test.
  * 
  * @author Petter Nordlander

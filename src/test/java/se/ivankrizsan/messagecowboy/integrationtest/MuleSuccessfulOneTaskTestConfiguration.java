@@ -29,14 +29,14 @@ import se.ivankrizsan.messagecowboy.MessageCowboyConfiguration;
 import se.ivankrizsan.messagecowboy.testconfig.PersistenceTestConfiguration;
 
 /**
- * Spring configuration class for the {@code TaskConfigRefreshTest}
+ * Spring configuration class for the {@code MuleSuccessfulOneTaskTest}
  * integration test.
  * 
  * @author Ivan Krizsan
  */
 @Configuration
 @Import({ MessageCowboyConfiguration.class, PersistenceTestConfiguration.class })
-public class TestTaskConfigRefreshConfiguration {
+public class MuleSuccessfulOneTaskTestConfiguration {
 
     /**
      * Override.

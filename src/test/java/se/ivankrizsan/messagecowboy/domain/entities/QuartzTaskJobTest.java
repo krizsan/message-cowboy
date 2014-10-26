@@ -16,9 +16,11 @@
  */
 package se.ivankrizsan.messagecowboy.domain.entities;
 
+import java.util.Date;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.AdditionalAnswers;
 import org.mockito.Mockito;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -27,10 +29,14 @@ import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MuleMoverMessage;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.QuartzTaskJob;
+import se.ivankrizsan.messagecowboy.domain.valueobjects.TaskExecutionStatus;
+import se.ivankrizsan.messagecowboy.domain.valueobjects.TaskExecutionStatusError;
+import se.ivankrizsan.messagecowboy.domain.valueobjects.TaskExecutionStatusNoMessageReceived;
+import se.ivankrizsan.messagecowboy.domain.valueobjects.TaskExecutionStatusSuccess;
+import se.ivankrizsan.messagecowboy.services.taskconfiguration.TaskConfigurationService;
 import se.ivankrizsan.messagecowboy.services.transport.TransportService;
 import se.ivankrizsan.messagecowboy.services.transport.exceptions.TransportException;
 import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
@@ -47,12 +53,15 @@ public class QuartzTaskJobTest extends AbstractTestBaseClass {
 
     /* Instance variable(s): */
     private TransportService mTransportService;
+    private TaskConfigurationService mTaskConfigurationService;
     /** Contains configuration for test-task. */
     private MessageCowboySchedulableTaskConfig mMoverTask;
     /** Task job under test. */
     private QuartzTaskJob mTaskJobUnderTest;
     /** Quartz job execution context used in tests. */
     private JobExecutionContext mJobExecContext;
+    /** Time immediately before a test was executed. */
+    private Date mBeforeTestTime;
 
     /**
      * Sets up before each test.
@@ -67,10 +76,25 @@ public class QuartzTaskJobTest extends AbstractTestBaseClass {
             mTransportService.receive(Mockito.anyString(), Mockito.anyLong()))
             .thenReturn(new MuleMoverMessage());
 
+        /* Create task configuration service mock. */
+        mTaskConfigurationService =
+            Mockito.mock(TaskConfigurationService.class);
+        Mockito
+            .when(
+                mTaskConfigurationService
+                    .save((MessageCowboySchedulableTaskConfig) Mockito
+                        .anyObject())).thenAnswer(
+                AdditionalAnswers.returnsFirstArg());
+
         mMoverTask =
             createFileMoverTask("/SomeInputDir/", "/SomeDestinationDir/");
         mTaskJobUnderTest = new QuartzTaskJob();
         mJobExecContext = createJobExecutionContextWithMoverTask(mMoverTask);
+        /*
+         * Ensure that before test time will always be smaller the time
+         * obtained by creating a Date instance after this method finishes.
+         */
+        mBeforeTestTime = new Date(System.currentTimeMillis() - 1);
     }
 
     /**
@@ -90,7 +114,7 @@ public class QuartzTaskJobTest extends AbstractTestBaseClass {
         /* None of the timing parameters are used in these tests. */
         theFileMoverTask.setCronExpression("0 0/5 * * * ?");
         theFileMoverTask.setInboundTimeout(1000);
-        /* 
+        /*
          * None of the URIs are used in these tests, since the transport
          * service is mocked.
          */
@@ -120,6 +144,9 @@ public class QuartzTaskJobTest extends AbstractTestBaseClass {
             inMoverTask);
         theJobDataMap.put(QuartzTaskJob.TRANSPORT_SERVICE_JOB_DATA_KEY,
             mTransportService);
+        theJobDataMap.put(
+            QuartzTaskJob.TASK_CONFIGURATION_SERVICE_JOB_DATA_KEY,
+            mTaskConfigurationService);
         Mockito.when(theJobDetail.getJobDataMap()).thenReturn(theJobDataMap);
 
         /* Create a job execution context that returns our job detail mock. */
@@ -142,7 +169,7 @@ public class QuartzTaskJobTest extends AbstractTestBaseClass {
     public void testSuccessfullyExecuteTaskJob() throws Exception {
         mTaskJobUnderTest.execute(mJobExecContext);
 
-        /* 
+        /*
          * Ensure that a message was received and dispatched by the transport
          * service.
          */
@@ -150,11 +177,28 @@ public class QuartzTaskJobTest extends AbstractTestBaseClass {
             Mockito.anyLong());
         Mockito.verify(mTransportService).dispatch(
             Mockito.any(MoverMessage.class), Mockito.anyString());
+
+        /* Check task status, which should be success with a message. */
+        Assert.assertTrue("Task should have a status", mMoverTask
+            .getTaskExecutionStatuses().size() > 0);
+        final Object theStatusObject =
+            mMoverTask.getTaskExecutionStatuses().get(0);
+        Assert.assertTrue("Task status should be success",
+            theStatusObject instanceof TaskExecutionStatusSuccess);
+        final TaskExecutionStatus theStatus =
+            (TaskExecutionStatus) theStatusObject;
+        Assert.assertNotNull("Task status should have a message", theStatus
+            .getStatusMessage());
+
+        /* Time of last execution should be after the time the test started. */
+        Assert.assertTrue(
+            "Last execution time should be after test start time",
+            mBeforeTestTime.before(theStatus.getTaskExecutionTime()));
     }
 
     /**
      * Tests executing a job which should perform a request for a message
-     * and attept to dispatch the received message.<br/>
+     * and attempt to dispatch the received message.<br/>
      * Expected result:<br/>
      * A message should be requested by the transport service.<br/>
      * An exception should be thrown (and caught by the test).
@@ -163,15 +207,14 @@ public class QuartzTaskJobTest extends AbstractTestBaseClass {
      */
     @Test
     public void testExecuteTaskJobFailDispatch() throws Exception {
-        /* 
+        /*
          * Mock transport service will throw exception when asked to dispatch
          * a message.
          */
-        Mockito
-            .doThrow(
-                new TransportException("transport service mock threw exception"))
-            .when(mTransportService)
-            .dispatch(Mockito.any(MoverMessage.class), Mockito.anyString());
+        Mockito.doThrow(
+            new TransportException("transport service mock threw exception"))
+            .when(mTransportService).dispatch(Mockito.any(MoverMessage.class),
+                Mockito.anyString());
 
         /*
          * Execute job which should fail to dispatch message.
@@ -190,6 +233,30 @@ public class QuartzTaskJobTest extends AbstractTestBaseClass {
         /* Verify that an exception was thrown. */
         Assert.assertTrue("An exception should have been thrown",
             theExceptionThrownFlag);
+
+        checkFailedTaskExecutionStatus();
+    }
+
+    /**
+     * Checks task status after the first, failed, execution of the task.
+     */
+    private void checkFailedTaskExecutionStatus() {
+        /* Check task status, which should be error with a message. */
+        Assert.assertTrue("Task should have a status", mMoverTask
+            .getTaskExecutionStatuses().size() > 0);
+        final Object theStatusObject =
+            mMoverTask.getTaskExecutionStatuses().get(0);
+        Assert.assertTrue("Task status should be success",
+            theStatusObject instanceof TaskExecutionStatusError);
+        final TaskExecutionStatus theStatus =
+            (TaskExecutionStatus) theStatusObject;
+        Assert.assertNotNull("Task status should have a message", theStatus
+            .getStatusMessage());
+
+        /* Time of last execution should be after the time the test started. */
+        Assert.assertTrue(
+            "Last execution time should be after test start time",
+            mBeforeTestTime.before(theStatus.getTaskExecutionTime()));
     }
 
     /**
@@ -202,15 +269,14 @@ public class QuartzTaskJobTest extends AbstractTestBaseClass {
      */
     @Test
     public void testExecuteTaskJobFailRequest() throws Exception {
-        /* 
+        /*
          * Mock transport service will throw exception when asked to dispatch
          * a message.
          */
-        Mockito
-            .doThrow(
-                new TransportException("transport service mock threw exception"))
-            .when(mTransportService)
-            .receive(Mockito.anyString(), Mockito.anyLong());
+        Mockito.doThrow(
+            new TransportException("transport service mock threw exception"))
+            .when(mTransportService).receive(Mockito.anyString(),
+                Mockito.anyLong());
 
         /*
          * Execute job which should fail to dispatch message.
@@ -226,5 +292,49 @@ public class QuartzTaskJobTest extends AbstractTestBaseClass {
         /* Verify that an exception was thrown. */
         Assert.assertTrue("An exception should have been thrown",
             theExceptionThrownFlag);
+
+        checkFailedTaskExecutionStatus();
+    }
+
+    /**
+     * Tests executing a job which should perform a request without
+     * receiving a message.<br/>
+     * Expected result:<br/>
+     * No message should be received and a corresponding task execution status
+     * should be generated.
+     *
+     * @throws Exception If error occurs. Indicates test failure.
+     */
+    @Test
+    public void testExecuteTaskJobNoMessageReceived() throws Exception {
+        /* Create new transport service mock. */
+        mTransportService = Mockito.mock(TransportService.class);
+        Mockito.when(
+            mTransportService.receive(Mockito.anyString(), Mockito.anyLong()))
+            .thenReturn(null);
+        mJobExecContext = createJobExecutionContextWithMoverTask(mMoverTask);
+
+        mTaskJobUnderTest.execute(mJobExecContext);
+
+        /* Ensure that an attempt to receive a message was made. */
+        Mockito.verify(mTransportService).receive(Mockito.anyString(),
+            Mockito.anyLong());
+
+        /* Check task status, which should be success with a message. */
+        Assert.assertTrue("Task should have a status", mMoverTask
+            .getTaskExecutionStatuses().size() > 0);
+        final Object theStatusObject =
+            mMoverTask.getTaskExecutionStatuses().get(0);
+        Assert.assertTrue("Task status should be no message received",
+            theStatusObject instanceof TaskExecutionStatusNoMessageReceived);
+        final TaskExecutionStatus theStatus =
+            (TaskExecutionStatus) theStatusObject;
+        Assert.assertNotNull("Task status should have a message", theStatus
+            .getStatusMessage());
+
+        /* Time of last execution should be after the time the test started. */
+        Assert.assertTrue(
+            "Last execution time should be after test start time",
+            mBeforeTestTime.before(theStatus.getTaskExecutionTime()));
     }
 }

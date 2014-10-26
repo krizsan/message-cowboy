@@ -22,6 +22,11 @@
     <persistence-unit name="message-cowboy" transaction-type="RESOURCE_LOCAL">
         <!-- List of entity classes used by the Message Cowboy. -->
     	<class>se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig</class>
+    	<class>se.ivankrizsan.messagecowboy.domain.valueobjects.TransportProperty</class>
+    	<class>se.ivankrizsan.messagecowboy.domain.valueobjects.TaskExecutionStatus</class>
+    	<class>se.ivankrizsan.messagecowboy.domain.valueobjects.TaskExecutionStatusSuccess</class>
+    	<class>se.ivankrizsan.messagecowboy.domain.valueobjects.TaskExecutionStatusError</class>
+    	<class>se.ivankrizsan.messagecowboy.domain.valueobjects.TaskExecutionStatusNoMessageReceived</class>
     	<exclude-unlisted-classes>false</exclude-unlisted-classes>
         <!--
             Disable caching of all entities, since it is expected that

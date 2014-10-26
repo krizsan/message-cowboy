@@ -19,7 +19,6 @@ package se.ivankrizsan.messagecowboy.testutils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -186,7 +185,7 @@ public abstract class AbstractTestBaseClass {
     /**
      * Verifies the moving of a file from the source to the destination directory
      * that is expected to have been completed successfully.
-     * 
+     *
      * @throws IOException If error occurs accessing file. Indicates failure.
      */
     protected void verifySuccessfulFileMove() throws IOException {
@@ -199,8 +198,8 @@ public abstract class AbstractTestBaseClass {
             !mTestFile.exists());
 
         /* Verify name of moved file. */
-        Assert.assertEquals("Original file name should be preserved",
-            mTestFile.getName(), theDestDirFiles[0].getName());
+        Assert.assertEquals("Original file name should be preserved", mTestFile
+            .getName(), theDestDirFiles[0].getName());
 
         /* Verify contents of moved file. */
         final String theMovedFileContents =
@@ -214,8 +213,7 @@ public abstract class AbstractTestBaseClass {
      *
      * @param inDelayTimeInMilliseconds Time to delay in milliseconds.
      */
-    protected void delay(
-        final long inDelayTimeInMilliseconds) {
+    protected void delay(final long inDelayTimeInMilliseconds) {
         try {
             Thread.sleep(inDelayTimeInMilliseconds);
         } catch (final InterruptedException theException) {
