@@ -1,5 +1,6 @@
 message-cowboy
 ==============
+[![Build Status](https://travis-ci.org/krizsan/message-cowboy.svg?branch=master)](https://travis-ci.org/krizsan/message-cowboy)
 
 Round 'em messages up and bring them home!
 
