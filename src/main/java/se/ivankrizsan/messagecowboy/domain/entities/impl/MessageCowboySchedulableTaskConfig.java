@@ -19,16 +19,15 @@ package se.ivankrizsan.messagecowboy.domain.entities.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import se.ivankrizsan.messagecowboy.domain.entities.SchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.domain.entities.TaskJob;
 import se.ivankrizsan.messagecowboy.domain.valueobjects.TaskExecutionStatus;
@@ -42,7 +41,8 @@ import se.ivankrizsan.messagecowboy.domain.valueobjects.TransportProperty;
  */
 @Entity(name = "MessageCowboySchedulableTaskConfig")
 @Table(name = "SchedulableTaskConfigurations")
-public class MessageCowboySchedulableTaskConfig implements SchedulableTaskConfig {
+public class MessageCowboySchedulableTaskConfig implements
+SchedulableTaskConfig {
 
     /* Constant(s): */
     /** Serialization version id of this class. */
@@ -90,10 +90,14 @@ public class MessageCowboySchedulableTaskConfig implements SchedulableTaskConfig
      * for this task.
      */
     @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY)
-    protected List<TransportProperty> mTransportProperties = new ArrayList<TransportProperty>();;
+    @JoinColumn(name = "TaskName")
+    protected List<TransportProperty> mTransportProperties =
+    new ArrayList<TransportProperty>();;
     /** Status reports for executions of the executions of the scheduled task. */
     @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY)
-    protected List<TaskExecutionStatus> mTaskExecutionStatuses = new ArrayList<TaskExecutionStatus>();
+    @JoinColumn(name = "TaskName")
+    protected List<TaskExecutionStatus> mTaskExecutionStatuses =
+    new ArrayList<TaskExecutionStatus>();
 
     @Override
     public String getName() {
@@ -190,9 +194,11 @@ public class MessageCowboySchedulableTaskConfig implements SchedulableTaskConfig
     }
 
     @Override
-    public void setTransportProperties(final List<TransportProperty> inTransportProperties) {
+    public void setTransportProperties(
+        final List<TransportProperty> inTransportProperties) {
         if (inTransportProperties == null) {
-            throw new IllegalArgumentException("Transport properties may not be null");
+            throw new IllegalArgumentException(
+                "Transport properties may not be null");
         }
         mTransportProperties = inTransportProperties;
     }
@@ -203,9 +209,11 @@ public class MessageCowboySchedulableTaskConfig implements SchedulableTaskConfig
     }
 
     @Override
-    public void setTaskExecutionStatuses(final List<TaskExecutionStatus> inTaskExecutionStatuses) {
+    public void setTaskExecutionStatuses(
+        final List<TaskExecutionStatus> inTaskExecutionStatuses) {
         if (inTaskExecutionStatuses == null) {
-            throw new IllegalArgumentException("Task execution statuses may not be null");
+            throw new IllegalArgumentException(
+                "Task execution statuses may not be null");
         }
         mTaskExecutionStatuses = inTaskExecutionStatuses;
     }

@@ -47,13 +47,10 @@ import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
  * @author Ivan Krizsan
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(
-    classes = {MuleSuccessfulOneTaskTestConfiguration.class})
+@ContextConfiguration(classes = {MuleSuccessfulOneTaskTestConfiguration.class})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class MuleSuccessfulOneTaskTest extends AbstractTestBaseClass {
     /* Constant(s): */
-    private static final String TASK_GROUP_NAME = "TestTasksGroup";
-    private static final String TASK_NAME = "FileToFileOne";
     private static final String EXISTING_STATUS_MESSAGE = "An old error";
 
     /* Instance variable(s): */
@@ -61,6 +58,7 @@ public class MuleSuccessfulOneTaskTest extends AbstractTestBaseClass {
     private TaskConfigurationService mTaskConfigurationService;
     @Autowired
     private MessageCowboyStarterService mMessageCowboyService;
+    private String mTestTaskName;
 
     /**
      * Performs preparations before each test.
@@ -73,28 +71,22 @@ public class MuleSuccessfulOneTaskTest extends AbstractTestBaseClass {
         createTestFileWithContent();
 
         /* Create endpoint URIs for the destination and source test directories. */
-        final String theInputDirPath =
-            mTestFile.getAbsolutePath().replaceAll("\\" + File.separator, "/");
+        final String theInputDirPath = mTestFile.getAbsolutePath().replaceAll("\\" + File.separator, "/");
         final String theDestDirPath =
-            mTestDestinationDirectory.getAbsolutePath().replaceAll(
-                "\\" + File.separator, "/");
+            mTestDestinationDirectory.getAbsolutePath().replaceAll("\\" + File.separator, "/");
 
         final String theInboundFileEndpointUri =
-            "file://" + theInputDirPath
-            + "?connector=nonStreamingFileConnectorInbound";
+            "file://" + theInputDirPath + "?connector=nonStreamingFileConnectorInbound";
         final String theOutboundFileEndpointUri =
-            "file://" + theDestDirPath
-            + "?connector=nonStreamingFileConnectorOutbound";
+            "file://" + theDestDirPath + "?connector=nonStreamingFileConnectorOutbound";
 
         /* Insert task configuration into database. */
-        MessageCowboySchedulableTaskConfig theTask =
-            new MessageCowboySchedulableTaskConfig();
-        theTask.setName(TASK_NAME);
-        theTask.setTaskGroupName(TASK_GROUP_NAME);
+        MessageCowboySchedulableTaskConfig theTask = createOneTaskConfiguration();
         theTask.setCronExpression("* * * * * ?");
         theTask.setInboundEndpointURI(theInboundFileEndpointUri);
         theTask.setOutboundEndpoint(theOutboundFileEndpointUri);
         theTask.setTaskEnabledFlag(true);
+        mTestTaskName = theTask.getName();
 
         /* Insert a previous execution status. */
         final TaskExecutionStatus theTaskExecutionStatus =
@@ -134,20 +126,18 @@ public class MuleSuccessfulOneTaskTest extends AbstractTestBaseClass {
 
         verifySuccessfulFileMove();
 
-        final MessageCowboySchedulableTaskConfig theTask =
-            mTaskConfigurationService.find(TASK_NAME);
+        final MessageCowboySchedulableTaskConfig theTask = mTaskConfigurationService.find(mTestTaskName);
 
         final List<TaskExecutionStatus> theTaskExecutionStatuses = theTask.getTaskExecutionStatuses();
 
         /* Verify that at least one execution status has been added. */
-        Assert.assertTrue("Task execution should have generated a status",
-            theTaskExecutionStatuses.size() >= 2);
+        Assert.assertTrue("Task execution should have generated a status", theTaskExecutionStatuses.size() >= 2);
 
         /* Verify that the first execution status is the one inserted by the test. */
         Assert.assertTrue("Old execution status should have been retained",
             (theTaskExecutionStatuses.get(0) instanceof TaskExecutionStatusError));
-        Assert.assertEquals("Old execution status should have been retained",
-            EXISTING_STATUS_MESSAGE, theTaskExecutionStatuses.get(0).getStatusMessage());
+        Assert.assertEquals("Old execution status should have been retained", EXISTING_STATUS_MESSAGE,
+            theTaskExecutionStatuses.get(0).getStatusMessage());
 
         /* Verify that that there is one successful task execution. */
         int theSuccessCount = 0;

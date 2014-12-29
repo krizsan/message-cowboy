@@ -16,10 +16,16 @@
  */
 package se.ivankrizsan.messagecowboy.services.starter;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+
+import se.ivankrizsan.messagecowboy.domain.valueobjects.TaskKey;
 
 /**
  * Spring configuration class for the Message Cowboy starter service.
@@ -28,6 +34,20 @@ import org.springframework.context.annotation.Scope;
  */
 @Configuration
 public class MessageCowboyStarterServiceConfiguration {
+    /* Constant(s): */
+    /** Task group name of message cowboy system task. */
+    public static final String MESSAGECOWBOY_SYSTEMTASKS_GROUPNAME = "MessageCowboySystemTasks";
+    /** Task name of task scheduling update task. */
+    public static final String MESSAGECOWBOY_RESCHEDULING_TASK_NAME = "MessageCowboyReschedulingTask";
+    /** Task name of task scheduling transport service configuration refresh. */
+    public static final String MESSAGECOWBOY_TRANSPORTSERVICE_CONFIGREFRESH_TASK_NAME =
+        "MessageCowboyTransportServiceRefreshTask";
+    /** Task name of task scheduling transport service configuration refresh. */
+    public static final String MESSAGECOWBOY_TASK_EXECUTION_STATUS_CLEANUP_TASK_NAME =
+        "MessageCowboyTaskExecutionStatusCleanupTask";
+    /* Property value(s): */
+    @Value("${TASK_EXECUTION_STATUS_DAYS_TO_KEEP}")
+    private String taskExecutionStatusDaysToKeep;
 
     /**
      * Service that starts and stops the Message Cowboy application.
@@ -37,17 +57,40 @@ public class MessageCowboyStarterServiceConfiguration {
     @Bean(initMethod = "start", destroyMethod = "stop")
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public MessageCowboyStarterService starterService() {
-        final MessageCowboyStarterServiceImpl theService =
-            new MessageCowboyStarterServiceImpl();
-        /* Set a default task refresh interval - every 5 minutes. */
-        theService.setTaskReschedulingCronExpression("0 0/5 * * * ?");
-        /* 
-         * Set a default transport service configuration refresh interval:
-         * Every 5 minutes.
-         */
-        theService
-            .setTransportServiceConfigurationRefreshCronExpression("0 0/5 * * * ?");
-
+        final MessageCowboyStarterServiceImpl theService = new MessageCowboyStarterServiceImpl();
+        /* Set a default task refresh interval. */
+        theService.setTaskReschedulingCronExpression("0 0/2 * * * ?");
+        theService.setTasksNotToUnschedule(retrieveTaskNotToUnscheduleTaskKeys());
+        /* Set a default transport service configuration refresh interval. */
+        theService.setTransportServiceConfigurationRefreshCronExpression("0 0/2 * * * ?");
+        /* Set cleanup interval and number of days to retain reports for task execution status reports cleanup. */
+        theService.setTaskExecutionStatusCleanupCronExpression("* 0/2 * * * ?");
+        theService.setTaskExecutionStatusMaxAgeInDays(Integer.parseInt(taskExecutionStatusDaysToKeep));
         return theService;
+    }
+
+    /**
+     * Retrieves a list of periodic tasks that are not to be unscheduled when
+     * Message Cowboy refreshes schedules of other scheduled tasks.
+     * These are typically tasks that perform housekeeping etc in the Message Cowboy.
+     *
+     * @return List of tasks that are not to be unscheduled.
+     */
+    public List<TaskKey> retrieveTaskNotToUnscheduleTaskKeys() {
+        final List<TaskKey> theNotToRescheduleTasks = new ArrayList<TaskKey>();
+        /* Task that updates schedules of Message Cowboy schedulable tasks. */
+        TaskKey theDoNotUnscheduleTasksKey =
+            new TaskKey(MESSAGECOWBOY_SYSTEMTASKS_GROUPNAME, MESSAGECOWBOY_RESCHEDULING_TASK_NAME);
+        theNotToRescheduleTasks.add(theDoNotUnscheduleTasksKey);
+        /* Task that refreshes configuration of transport services. */
+        theDoNotUnscheduleTasksKey =
+            new TaskKey(MESSAGECOWBOY_SYSTEMTASKS_GROUPNAME, MESSAGECOWBOY_TRANSPORTSERVICE_CONFIGREFRESH_TASK_NAME);
+        theNotToRescheduleTasks.add(theDoNotUnscheduleTasksKey);
+        /* Task that cleans up old task execution status reports. */
+        theDoNotUnscheduleTasksKey =
+            new TaskKey(MESSAGECOWBOY_SYSTEMTASKS_GROUPNAME, MESSAGECOWBOY_TASK_EXECUTION_STATUS_CLEANUP_TASK_NAME);
+        theNotToRescheduleTasks.add(theDoNotUnscheduleTasksKey);
+
+        return theNotToRescheduleTasks;
     }
 }

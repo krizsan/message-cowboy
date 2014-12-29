@@ -18,7 +18,6 @@ package se.ivankrizsan.messagecowboy.domain.valueobjects;
 
 import java.io.Serializable;
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
@@ -29,11 +28,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 
 /**
@@ -46,7 +45,8 @@ import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulabl
 @Entity
 @Table(name = "TaskExecutionStatuses")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "resultStatus", discriminatorType = DiscriminatorType.STRING, length = 15)
+@DiscriminatorColumn(name = "resultStatus",
+    discriminatorType = DiscriminatorType.STRING, length = 15)
 public abstract class TaskExecutionStatus implements Serializable {
     /* Constant(s): */
     private static final long serialVersionUID = -6104099860536900092L;
@@ -58,6 +58,7 @@ public abstract class TaskExecutionStatus implements Serializable {
     protected Long id;
     /** Task configuration for which this is a execution status. */
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TaskName")
     protected MessageCowboySchedulableTaskConfig taskConfiguration;
     /** Message conveying additional status information. */
     @Column(nullable = true)
@@ -84,7 +85,8 @@ public abstract class TaskExecutionStatus implements Serializable {
      * @param inStatusMessage Status message.
      * @param inTaskExecutionTime Task execution time.
      */
-    public TaskExecutionStatus(final MessageCowboySchedulableTaskConfig inTaskConfiguration,
+    public TaskExecutionStatus(
+        final MessageCowboySchedulableTaskConfig inTaskConfiguration,
         final String inStatusMessage, final Date inTaskExecutionTime) {
         statusMessage = inStatusMessage;
         taskExecutionTime = inTaskExecutionTime;

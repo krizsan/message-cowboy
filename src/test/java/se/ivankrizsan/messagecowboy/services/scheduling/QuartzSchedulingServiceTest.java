@@ -34,6 +34,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.domain.valueobjects.TaskKey;
+import se.ivankrizsan.messagecowboy.services.scheduling.exceptions.SchedulingException;
 import se.ivankrizsan.messagecowboy.services.scheduling.helpers.JPATestMoverTask;
 import se.ivankrizsan.messagecowboy.services.scheduling.helpers.QuartzTestTaskJob;
 
@@ -43,7 +44,7 @@ import se.ivankrizsan.messagecowboy.services.scheduling.helpers.QuartzTestTaskJo
  * @author Ivan Krizsan
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { SchedulingServiceConfiguration.class })
+@ContextConfiguration(classes = {SchedulingServiceConfiguration.class})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class QuartzSchedulingServiceTest {
     /* Constant(s): */
@@ -93,11 +94,21 @@ public class QuartzSchedulingServiceTest {
 
         Thread.sleep(1500);
 
-        final Integer theTaskInvocationCount =
-            (Integer) mJobDataMap.get(QuartzTestTaskJob.INVOCATION_COUNTER_KEY);
+        final Integer theTaskInvocationCount = (Integer) mJobDataMap.get(QuartzTestTaskJob.INVOCATION_COUNTER_KEY);
 
-        Assert.assertTrue("Task should have been executed at least once",
-            theTaskInvocationCount.intValue() >= 1);
+        Assert.assertTrue("Task should have been executed at least once", theTaskInvocationCount.intValue() >= 1);
+    }
+
+    /**
+     * Tests scheduling a task with a bad CRON expression.
+     * 
+     *
+     * @throws Exception Expected result.
+     */
+    @Test(expected = SchedulingException.class)
+    public void testScheduleTaskBadCronExpression() throws Exception {
+        mTestTask.setCronExpression("a b c d e *");
+        mSchedulingService.scheduleTask(mTestTask, mJobDataMap);
     }
 
     /**
@@ -113,12 +124,9 @@ public class QuartzSchedulingServiceTest {
 
         Thread.sleep(1500);
 
-        final Integer theTaskInvocationCount =
-            (Integer) mJobDataMap.get(QuartzTestTaskJob.INVOCATION_COUNTER_KEY);
+        final Integer theTaskInvocationCount = (Integer) mJobDataMap.get(QuartzTestTaskJob.INVOCATION_COUNTER_KEY);
 
-        Assert.assertNull(
-            "Task should never have executed and no counter exist",
-            theTaskInvocationCount);
+        Assert.assertNull("Task should never have executed and no counter exist", theTaskInvocationCount);
     }
 
     /**
@@ -135,27 +143,21 @@ public class QuartzSchedulingServiceTest {
 
         /* Check that there is a job data map while the task is running. */
         Thread.sleep(1500);
-        theJobDataMap =
-            mSchedulingService.findJobDataMap(TASK_GROUP_NAME, TASK_NAME);
+        theJobDataMap = mSchedulingService.findJobDataMap(TASK_GROUP_NAME, TASK_NAME);
         Assert.assertNotNull(theJobDataMap);
-        theTaskInvocationCount =
-            (Integer) mJobDataMap.get(QuartzTestTaskJob.INVOCATION_COUNTER_KEY);
-        Assert.assertNotNull("The task should have been invoked at least once",
-            theTaskInvocationCount);
+        theTaskInvocationCount = (Integer) mJobDataMap.get(QuartzTestTaskJob.INVOCATION_COUNTER_KEY);
+        Assert.assertNotNull("The task should have been invoked at least once", theTaskInvocationCount);
 
         mSchedulingService.unscheduleTask(TASK_GROUP_NAME, TASK_NAME);
 
         /* Check that there is no job data map after the task has been unscheduled. */
         Thread.sleep(1500);
-        theJobDataMap =
-            mSchedulingService.findJobDataMap(TASK_GROUP_NAME, TASK_NAME);
+        theJobDataMap = mSchedulingService.findJobDataMap(TASK_GROUP_NAME, TASK_NAME);
         Assert.assertNull(theJobDataMap);
 
         /* Check that the task was executed. */
-        theTaskInvocationCount =
-            (Integer) mJobDataMap.get(QuartzTestTaskJob.INVOCATION_COUNTER_KEY);
-        Assert.assertTrue("Task should have been executed at least once",
-            theTaskInvocationCount.intValue() >= 1);
+        theTaskInvocationCount = (Integer) mJobDataMap.get(QuartzTestTaskJob.INVOCATION_COUNTER_KEY);
+        Assert.assertTrue("Task should have been executed at least once", theTaskInvocationCount.intValue() >= 1);
     }
 
     /**
@@ -169,22 +171,18 @@ public class QuartzSchedulingServiceTest {
 
         Thread.sleep(100);
 
-        boolean theUnscheduledFlag =
-            mSchedulingService.unscheduleTask(TASK_GROUP_NAME, TASK_NAME);
+        boolean theUnscheduledFlag = mSchedulingService.unscheduleTask(TASK_GROUP_NAME, TASK_NAME);
 
         Thread.sleep(100);
 
-        Assert.assertTrue("Task should have been successfully unscheduled",
-            theUnscheduledFlag);
+        Assert.assertTrue("Task should have been successfully unscheduled", theUnscheduledFlag);
 
         /*
          * Trying to unschedule the same task again should indicate that
          * no task has been unscheduled.
          */
-        theUnscheduledFlag =
-            mSchedulingService.unscheduleTask(TASK_GROUP_NAME, TASK_NAME);
-        Assert.assertFalse("Task should already have been unscheduled",
-            theUnscheduledFlag);
+        theUnscheduledFlag = mSchedulingService.unscheduleTask(TASK_GROUP_NAME, TASK_NAME);
+        Assert.assertFalse("Task should already have been unscheduled", theUnscheduledFlag);
     }
 
     /**
@@ -206,10 +204,8 @@ public class QuartzSchedulingServiceTest {
          * Trying to unschedule the same task again should indicate that
          * no task has been unscheduled.
          */
-        final boolean theUnscheduledFlag =
-            mSchedulingService.unscheduleTask(TASK_GROUP_NAME, TASK_NAME);
-        Assert.assertFalse("Task should already have been unscheduled",
-            theUnscheduledFlag);
+        final boolean theUnscheduledFlag = mSchedulingService.unscheduleTask(TASK_GROUP_NAME, TASK_NAME);
+        Assert.assertFalse("Task should already have been unscheduled", theUnscheduledFlag);
     }
 
     /**
@@ -238,10 +234,8 @@ public class QuartzSchedulingServiceTest {
          * unscheduling tasks earlier should indicate that the task
          * has now been unscheduled successfully.
          */
-        final boolean theUnscheduledFlag =
-            mSchedulingService.unscheduleTask(TASK_GROUP_NAME, TASK_NAME);
-        Assert.assertTrue("Task should not have been unscheduled earlier",
-            theUnscheduledFlag);
+        final boolean theUnscheduledFlag = mSchedulingService.unscheduleTask(TASK_GROUP_NAME, TASK_NAME);
+        Assert.assertTrue("Task should not have been unscheduled earlier", theUnscheduledFlag);
     }
 
     /**
@@ -251,16 +245,14 @@ public class QuartzSchedulingServiceTest {
      */
     @Test
     public void testScheduleMethodInvokingTask() throws Exception {
-        mSchedulingService.scheduleMethodInvocation(
-            this, "methodToBeInvoked", null, "* * * * * ?", TASK_NAME, TASK_GROUP_NAME);
+        mSchedulingService.scheduleMethodInvocation(this, "methodToBeInvoked", null, "* * * * * ?", TASK_NAME,
+            TASK_GROUP_NAME);
 
         Thread.sleep(1500);
 
-        final Integer theTaskInvocationCount =
-            (Integer) mJobDataMap.get(QuartzTestTaskJob.INVOCATION_COUNTER_KEY);
+        final Integer theTaskInvocationCount = (Integer) mJobDataMap.get(QuartzTestTaskJob.INVOCATION_COUNTER_KEY);
 
-        Assert.assertTrue("Task should have been executed at least once",
-            theTaskInvocationCount.intValue() >= 1);
+        Assert.assertTrue("Task should have been executed at least once", theTaskInvocationCount.intValue() >= 1);
     }
 
     /**

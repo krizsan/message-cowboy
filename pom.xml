@@ -2,15 +2,15 @@
     This file is part of Message Cowboy.
     Copyright 2014 Ivan A Krizsan. All Rights Reserved.
     Message Cowboy is free software:
-    You can redistribute it and/or modify it under the terms of the GNU General
+    you can redistribute it and/or modify it under the terms of the GNU General
     Public License as published by the Free Software Foundation, either version 3
     of the License, or (at your option) any later version.
- 
+
     This program is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
     FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
     details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/>.
 -->
@@ -29,7 +29,7 @@
         <!-- Use the same Spring version as Mule uses. -->
         <spring.version>3.2.1.RELEASE</spring.version>
         <!--
-            Version of Spring Data JPA that has depends on a version of
+            Version of Spring Data JPA that has depends on a version of 
             the Spring framework that is not newer than the one used here.
         -->
         <spring.data.jpa.version>1.4.5.RELEASE</spring.data.jpa.version>
@@ -39,7 +39,7 @@
 
         <eclipsePluginVersion>2.8</eclipsePluginVersion>
         <!-- Aligned with ActiveMQ version since activemq-all ships with activemq-camel component -->
-		<camel.version>2.12.1</camel.version>
+        <camel.version>2.12.1</camel.version>
         <jdkName>JavaSE-1.7</jdkName>
         <jdk.version>1.7</jdk.version>
         <activemq.version>5.9.0</activemq.version>
@@ -84,7 +84,7 @@
             <artifactId>mule-transport-vm</artifactId>
             <version>${mule.version}</version>
         </dependency>
-        
+
         <!-- Mule modules -->
         <dependency>
             <groupId>org.mule.modules</groupId>
@@ -106,45 +106,45 @@
             <artifactId>mule-module-xml</artifactId>
             <version>${mule.version}</version>
         </dependency>
-        
+
         <!-- Camel dependencies. Add components as needed -->
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
             <version>${camel.version}</version>
         </dependency>
-        <dependency> <!-- Support for spring contexts -->
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-spring</artifactId>
             <version>${camel.version}</version>
         </dependency>
-        <dependency> <!-- Spring JMS -->
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jms</artifactId>
             <version>${camel.version}</version>
         </dependency>
-        <dependency> <!-- Apache HTTP client 4.x based -->
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-http4</artifactId>
             <version>${camel.version}</version>
         </dependency>
-        <dependency> <!-- Spring JDBC based  -->
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-sql</artifactId>
             <version>${camel.version}</version>
         </dependency>
-        <dependency> <!-- S/FTP/S support -->
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-ftp</artifactId>
             <version>${camel.version}</version>
         </dependency>
-        <dependency><!-- Streaming support -->
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-stream</artifactId>
             <version>${camel.version}</version>
         </dependency>
-        
-        
+
+
         <!-- Spring dependencies. -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -202,7 +202,8 @@
             <artifactId>activemq-all</artifactId>
             <version>${activemq.version}</version>
         </dependency>
-        <dependency><!-- Included in activemq-all in 5.9.1+ -->
+        <!-- Included in activemq-all in 5.9.1+ -->
+        <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-pool</artifactId>
             <version>${activemq.version}</version>
@@ -243,13 +244,15 @@
             <version>${camel.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency> <!-- To inject mock endpoints etc. -->
+        <!-- To inject mock endpoints etc. -->
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-test-spring</artifactId>
             <version>${camel.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency><!-- To allow java wired test contexts. -->
+        <!-- To allow test contexts that use Spring Java-config. -->
+        <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-spring-javaconfig</artifactId>
             <version>${camel.version}</version>
@@ -307,8 +310,9 @@
                 </configuration>
             </plugin>
             <!--
-                Copy the configuration properties file and the directory containing
-                Mule configuration files to the target directory. -->
+                Copy the configuration properties file and the directory 
+                containing Mule configuration files to the target directory.
+            -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>2.6</version>
@@ -356,6 +360,7 @@
             <layout>default</layout>
         </repository>
     </repositories>
+
     <pluginRepositories>
         <pluginRepository>
             <id>mulesoft-release</id>
@@ -367,4 +372,101 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
+
+    <profiles>
+        <!-- 
+            JBoss Tattletale report generation profile.
+            Generate reports with: clean verify -DtattleTale -DskipTests
+        -->
+        <profile>
+            <activation>
+                <property>
+                    <name>tattleTale</name>
+                </property>
+            </activation>
+            <properties>
+                <!-- Temporary directory that will hold files that are to be analyzed by Tattletale. -->
+                <tattletale.tempdir>${project.build.directory}/temp-jar-directory</tattletale.tempdir>
+                <!--  Directory to which Tattletale reports will be written.-->
+                <tattletale.reportdir>${project.build.directory}/tattletale-report</tattletale.reportdir>
+                <!-- External Tattletale configuration file (not external to project). -->
+                <tattletale.configfile>${project.basedir}/jboss-tattletale.properties</tattletale.configfile>
+            </properties>
+            <build>
+                <plugins>
+                    <!-- 
+                        Copy JARs of all dependencies to directory that Tattletale is to analyze
+                        when creating reports.
+                    -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.9</version>
+                        <executions>
+                            <execution>
+                                <id>copy-dependencies</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${tattletale.tempdir}</outputDirectory>
+                                    <overWriteReleases>true</overWriteReleases>
+                                    <overWriteSnapshots>true</overWriteSnapshots>
+                                    <overWriteIfNewer>true</overWriteIfNewer>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!--
+                        Copy JAR of this project to directory that Tattletale is to analyze when
+                        creating reports.
+                    -->
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>2.7</version>
+                        <executions>
+                            <execution>
+                                <id>copy-resources</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${tattletale.tempdir}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.build.directory}</directory>
+                                            <includes>
+                                                <include>${project.artifactId}-${project.version}.jar</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Generate Tattletale reports. -->
+                    <plugin>
+                        <groupId>org.jboss.tattletale</groupId>
+                        <artifactId>tattletale-maven</artifactId>
+                        <version>1.2.0.Beta2</version>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <source>${tattletale.tempdir}</source>
+                            <destination>${tattletale.reportdir}</destination>
+                            <configuration>${tattletale.configfile}</configuration>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

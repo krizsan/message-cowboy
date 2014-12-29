@@ -20,17 +20,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Service;
+
 import se.ivankrizsan.messagecowboy.domain.entities.SchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.QuartzTaskJob;
 import se.ivankrizsan.messagecowboy.domain.valueobjects.TaskKey;
 import se.ivankrizsan.messagecowboy.services.scheduling.SchedulingService;
 import se.ivankrizsan.messagecowboy.services.taskconfiguration.TaskConfigurationService;
+import se.ivankrizsan.messagecowboy.services.taskexecutionstatus.TaskExecutionStatusService;
 import se.ivankrizsan.messagecowboy.services.transport.TransportService;
 
 /**
@@ -45,17 +48,7 @@ import se.ivankrizsan.messagecowboy.services.transport.TransportService;
 class MessageCowboyStarterServiceImpl implements MessageCowboyStarterService {
     /* Constant(s): */
     /** Class logger. */
-    private static final Logger LOGGER = LoggerFactory
-        .getLogger(MessageCowboyStarterServiceImpl.class);
-    /** Task group name of task scheduling update task. */
-    protected static final String MESSAGECOWBOY_SYSTEMTASKS_GROUPNAME =
-        "MessageCowboySystemTasks";
-    /** Task name of task scheduling update task. */
-    protected static final String MESSAGECOWBOY_RESCHEDULING_TASK_NAME =
-        "MessageCowboyReschedulingTask";
-    /** Task name of task scheduling transport service configuration refresh. */
-    protected static final String MESSAGECOWBOY_TRANSPORTSERVICE_CONFIGREFRESH_TASK_NAME =
-        "MessageCowboyTransportServiceRefreshTask";
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageCowboyStarterServiceImpl.class);
 
     /* Instance variable(s): */
     @Autowired
@@ -64,62 +57,49 @@ class MessageCowboyStarterServiceImpl implements MessageCowboyStarterService {
     protected TransportService mTransportService;
     @Autowired
     protected TaskConfigurationService mTaskConfigurationService;
-    /**
-     * Cron expression determining when Message Cowboy tasks will be
-     * refreshed.
-     */
+    @Autowired
+    protected TaskExecutionStatusService mTaskExecutionStatusService;
+    /** Cron expression determining when Message Cowboy tasks will be refreshed. */
     protected String mTaskReschedulingCronExpression;
-    /**
-     * List of tasks that are not to be unscheduled when refreshing task
-     * schedules.
-     */
+    /** List of tasks that are not to be unscheduled when refreshing task schedules. */
     protected List<TaskKey> mTasksNotToUnschedule = new ArrayList<TaskKey>();
-    /**
-     * Cron expression determining when configurations of the transport service
-     * will be refreshed.
-     */
+    /** Cron expression determining when configurations of the transport service will be refreshed. */
     protected String mTransportServiceConfigurationRefreshCronExpression;
+    /** Cron expression determining when the task execution status cleanup will be performed. */
+    protected String mTaskExecutionStatusCleanupCronExpression;
+    /** Maximum age of task execution status reports that are to be retained. */
+    protected int mTaskExecutionStatusMaxAgeInDays;
 
     @Override
     public void start() {
         LOGGER.info("Message Cowboy starting...");
-
         scheduleTasks();
-
-        schedulePeriodicRefreshes();
-
-        /*
-         * Fill up list of tasks that are not to be unscheduled when
-         * refreshing task schedules.
-         */
-        TaskKey theDoNotUnscheduleTasksKey =
-            new TaskKey(MESSAGECOWBOY_SYSTEMTASKS_GROUPNAME,
-                MESSAGECOWBOY_RESCHEDULING_TASK_NAME);
-        mTasksNotToUnschedule.add(theDoNotUnscheduleTasksKey);
-        theDoNotUnscheduleTasksKey =
-            new TaskKey(MESSAGECOWBOY_SYSTEMTASKS_GROUPNAME,
-                MESSAGECOWBOY_TRANSPORTSERVICE_CONFIGREFRESH_TASK_NAME);
-        mTasksNotToUnschedule.add(theDoNotUnscheduleTasksKey);
-
+        scheduleSystemTasks();
         LOGGER.info("Message Cowboy started");
     }
 
     /**
-     * Schedules task that will refresh the Message Cowboy tasks.
+     * Schedules the Message Cowboy system tasks.
      */
-    protected void schedulePeriodicRefreshes() {
+    protected void scheduleSystemTasks() {
         /* Schedule task that refreshes the scheduled Message Cowboy tasks. */
-        mSchedulingService.scheduleMethodInvocation(this, "scheduleTasks",
-            null, mTaskReschedulingCronExpression,
-            MESSAGECOWBOY_RESCHEDULING_TASK_NAME,
-            MESSAGECOWBOY_SYSTEMTASKS_GROUPNAME);
+        mSchedulingService.scheduleMethodInvocation(this, "scheduleTasks", null, mTaskReschedulingCronExpression,
+            MessageCowboyStarterServiceConfiguration.MESSAGECOWBOY_RESCHEDULING_TASK_NAME,
+            MessageCowboyStarterServiceConfiguration.MESSAGECOWBOY_SYSTEMTASKS_GROUPNAME);
 
         /* Schedule task that refreshes transport service configurations. */
-        mSchedulingService.scheduleMethodInvocation(mTransportService,
-            "refreshConnectors", null,
+        mSchedulingService.scheduleMethodInvocation(mTransportService, "refreshConnectors", null,
             mTransportServiceConfigurationRefreshCronExpression,
-            MESSAGECOWBOY_TRANSPORTSERVICE_CONFIGREFRESH_TASK_NAME,
-            MESSAGECOWBOY_SYSTEMTASKS_GROUPNAME);
+            MessageCowboyStarterServiceConfiguration.MESSAGECOWBOY_TRANSPORTSERVICE_CONFIGREFRESH_TASK_NAME,
+            MessageCowboyStarterServiceConfiguration.MESSAGECOWBOY_SYSTEMTASKS_GROUPNAME);
+
+        /* Schedule task execution status periodic cleanup. */
+        final Object[] theDeleteIfOlderThanDaysParameter = new Object[1];
+        theDeleteIfOlderThanDaysParameter[0] = mTaskExecutionStatusMaxAgeInDays;
+        mSchedulingService.scheduleMethodInvocation(mTaskExecutionStatusService, "deleteIfOlderThanDays",
+            theDeleteIfOlderThanDaysParameter, mTaskExecutionStatusCleanupCronExpression,
+            MessageCowboyStarterServiceConfiguration.MESSAGECOWBOY_TASK_EXECUTION_STATUS_CLEANUP_TASK_NAME,
+            MessageCowboyStarterServiceConfiguration.MESSAGECOWBOY_SYSTEMTASKS_GROUPNAME);
     }
 
     @Override
@@ -132,16 +112,12 @@ class MessageCowboyStarterServiceImpl implements MessageCowboyStarterService {
     @Override
     public void scheduleTasks() {
         LOGGER.info("Starting to (re)schedule Message Cowboy tasks");
-        /*
-         * First unschedule all non-system tasks, in case tasks have been
-         * scheduled earlier.
-         */
+        /* First unschedule all non-system tasks, in case tasks have been scheduled earlier. */
         mSchedulingService.unscheduleOtherTasks(mTasksNotToUnschedule);
         LOGGER.info("Existing tasks unscheduled");
 
         /* Read all current task configurations from database. */
-        List<MessageCowboySchedulableTaskConfig> theTaskConfigurations =
-            mTaskConfigurationService.findAll();
+        List<MessageCowboySchedulableTaskConfig> theTaskConfigurations = mTaskConfigurationService.findAll();
         LOGGER.debug("Found {} number of tasks", theTaskConfigurations.size());
 
         /* Schedule all enabled tasks. */
@@ -152,28 +128,18 @@ class MessageCowboyStarterServiceImpl implements MessageCowboyStarterService {
                  * references to the services needed when the task is
                  * executed.
                  */
-                final Map<String, Object> theJobDataMap =
-                    new HashMap<String, Object>();
-                theJobDataMap.put(
-                    QuartzTaskJob.TASK_CONFIGURATION_JOB_DATA_KEY,
-                    theTaskConfiguration);
-                theJobDataMap.put(QuartzTaskJob.TRANSPORT_SERVICE_JOB_DATA_KEY,
-                    mTransportService);
-                theJobDataMap.put(
-                    QuartzTaskJob.TASK_CONFIGURATION_SERVICE_JOB_DATA_KEY,
-                    mTaskConfigurationService);
+                final Map<String, Object> theJobDataMap = new HashMap<String, Object>();
+                theJobDataMap.put(QuartzTaskJob.TASK_CONFIGURATION_JOB_DATA_KEY, theTaskConfiguration);
+                theJobDataMap.put(QuartzTaskJob.TRANSPORT_SERVICE_JOB_DATA_KEY, mTransportService);
+                theJobDataMap.put(QuartzTaskJob.TASK_CONFIGURATION_SERVICE_JOB_DATA_KEY, mTaskConfigurationService);
 
-                mSchedulingService.scheduleTask(theTaskConfiguration,
-                    theJobDataMap);
+                mSchedulingService.scheduleTask(theTaskConfiguration, theJobDataMap);
 
-                LOGGER.debug("Scheduled task {} in group {}",
-                    theTaskConfiguration.getName(), theTaskConfiguration
-                        .getTaskGroupName());
+                LOGGER.debug("Scheduled task {} in group {}", theTaskConfiguration.getName(),
+                    theTaskConfiguration.getTaskGroupName());
             } else {
-                LOGGER.debug(
-                    "Task {} in group {} is disabled and thus not scheduled",
-                    theTaskConfiguration.getName(), theTaskConfiguration
-                        .getTaskGroupName());
+                LOGGER.debug("Task {} in group {} is disabled and thus not scheduled", theTaskConfiguration.getName(),
+                    theTaskConfiguration.getTaskGroupName());
             }
         }
 
@@ -185,8 +151,7 @@ class MessageCowboyStarterServiceImpl implements MessageCowboyStarterService {
     }
 
     @Required
-    public void setTaskReschedulingCronExpression(
-        final String inTaskReschedulingCronExpression) {
+    public void setTaskReschedulingCronExpression(final String inTaskReschedulingCronExpression) {
         mTaskReschedulingCronExpression = inTaskReschedulingCronExpression;
     }
 
@@ -197,7 +162,28 @@ class MessageCowboyStarterServiceImpl implements MessageCowboyStarterService {
     @Required
     public void setTransportServiceConfigurationRefreshCronExpression(
         final String inTransportServiceConfigurationRefreshCronExpression) {
-        mTransportServiceConfigurationRefreshCronExpression =
-            inTransportServiceConfigurationRefreshCronExpression;
+        mTransportServiceConfigurationRefreshCronExpression = inTransportServiceConfigurationRefreshCronExpression;
+    }
+
+    public void setTasksNotToUnschedule(final List<TaskKey> inTasksNotToUnschedule) {
+        mTasksNotToUnschedule = inTasksNotToUnschedule;
+    }
+
+    public String getTaskExecutionStatusCleanupCronExpression() {
+        return mTaskExecutionStatusCleanupCronExpression;
+    }
+
+    @Required
+    public void setTaskExecutionStatusCleanupCronExpression(final String inTaskExecutionStatusCleanupCronExpression) {
+        mTaskExecutionStatusCleanupCronExpression = inTaskExecutionStatusCleanupCronExpression;
+    }
+
+    public int getTaskExecutionStatusMaxAgeInDays() {
+        return mTaskExecutionStatusMaxAgeInDays;
+    }
+
+    @Required
+    public void setTaskExecutionStatusMaxAgeInDays(final int inTaskExecutionStatusMaxAgeInDays) {
+        mTaskExecutionStatusMaxAgeInDays = inTaskExecutionStatusMaxAgeInDays;
     }
 }

@@ -31,25 +31,21 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 public final class MessageCowboy {
     /* Constant(s): */
     /** Class logger. */
-    private static final Logger LOGGER = LoggerFactory
-        .getLogger(MessageCowboy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageCowboy.class);
 
     /**
      * Starts the Message Cowboy.
      * 
      * @param args Command line arguments. Not used.
      */
-    public static void main(
-        final String[] args) {
+    public static void main(final String[] args) {
         LOGGER.debug("Loading Spring context...");
 
         logProcessIdAndHost();
 
         @SuppressWarnings("resource")
         final AnnotationConfigApplicationContext theSpringContext =
-            new AnnotationConfigApplicationContext(
-                MessageCowboyConfiguration.class,
-                ProductionPropertyOverrides.class);
+            new AnnotationConfigApplicationContext(MessageCowboyConfiguration.class, ProductionPropertyOverrides.class);
         theSpringContext.registerShutdownHook();
 
         LOGGER.debug("Spring context loaded.");
@@ -69,8 +65,7 @@ public final class MessageCowboy {
     }
 
     private static void logProcessIdAndHost() {
-        final String[] thePidAndHost =
-            ManagementFactory.getRuntimeMXBean().getName().split("@");
+        final String[] thePidAndHost = ManagementFactory.getRuntimeMXBean().getName().split("@");
 
         LOGGER.info("Process id: {}", thePidAndHost[0]);
         LOGGER.info("Host: {}", thePidAndHost[1]);

@@ -17,6 +17,7 @@
 package se.ivankrizsan.messagecowboy.services.scheduling;
 
 import java.util.Arrays;
+
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -24,6 +25,7 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.MethodInvoker;
+
 import se.ivankrizsan.messagecowboy.domain.entities.TaskJob;
 
 /**
@@ -44,40 +46,29 @@ import se.ivankrizsan.messagecowboy.domain.entities.TaskJob;
 public class MethodInvokingJob implements TaskJob, Job {
     /* Constant(s): */
     /** Class logger. */
-    private static final Logger LOGGER = LoggerFactory
-        .getLogger(MethodInvokingJob.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodInvokingJob.class);
     /** Key to entry in job data map to object on which method is to be invoked on. */
-    public final static String TARGET_OBJECT_KEY =
-        "_methodinvokingjob_targetobject";
+    public final static String TARGET_OBJECT_KEY = "_methodinvokingjob_targetobject";
     /** Key to entry in job data map to name of method to be invoked. */
-    public final static String TARGET_METHOD_KEY =
-        "_methodinvokingjob_targetmethod";
+    public final static String TARGET_METHOD_KEY = "_methodinvokingjob_targetmethod";
     /** Key to entry in job data map to array of parameters to method to invoke. */
-    public final static String TARGET_METHOD_PARAMETERS_KEY =
-        "_methodinvokingjob_targetmethodparams";
+    public final static String TARGET_METHOD_PARAMETERS_KEY = "_methodinvokingjob_targetmethodparams";
 
     @Override
-    public void execute(final JobExecutionContext inContext)
-        throws JobExecutionException {
-        final JobDataMap theJobDataMap =
-            inContext.getJobDetail().getJobDataMap();
+    public void execute(final JobExecutionContext inContext) throws JobExecutionException {
+        final JobDataMap theJobDataMap = inContext.getJobDetail().getJobDataMap();
         final String theTaskName = inContext.getJobDetail().getKey().getName();
-        final String theTaskGroupName =
-            inContext.getJobDetail().getKey().getGroup();
+        final String theTaskGroupName = inContext.getJobDetail().getKey().getGroup();
 
-        LOGGER.info("Started executing task {} in group {}", theTaskName,
-            theTaskGroupName);
+        LOGGER.info("Started executing task {} in group {}", theTaskName, theTaskGroupName);
 
         final Object theTargetObject = theJobDataMap.get(TARGET_OBJECT_KEY);
-        final Object theTargetMethodNameObject =
-            theJobDataMap.get(TARGET_METHOD_KEY);
-        final Object theTargetMethodParamsObject =
-            theJobDataMap.get(TARGET_METHOD_PARAMETERS_KEY);
+        final Object theTargetMethodNameObject = theJobDataMap.get(TARGET_METHOD_KEY);
+        final Object theTargetMethodParamsObject = theJobDataMap.get(TARGET_METHOD_PARAMETERS_KEY);
 
         if (theTargetObject != null && theTargetMethodNameObject != null) {
             /* Cast parameters to appropriate types. */
-            final String theTargetMethodName =
-                (String) theTargetMethodNameObject;
+            final String theTargetMethodName = (String) theTargetMethodNameObject;
             Object[] theTargetMethodParams = new Object[0];
 
             /*
@@ -94,13 +85,10 @@ public class MethodInvokingJob implements TaskJob, Job {
              */
             if (LOGGER.isDebugEnabled()) {
                 final Object[] theDebugLogArguments =
-                    new Object[] { theTargetMethodName,
-                        theTargetObject.getClass().getName(),
-                        Arrays.asList(theTargetMethodParams).toString() };
-                LOGGER
-                    .debug(
-                        "Invoking the method {} on object of the type {} with the parameters {}",
-                        theDebugLogArguments);
+                    new Object[] {theTargetMethodName, theTargetObject.getClass().getName(),
+                        Arrays.asList(theTargetMethodParams).toString()};
+                LOGGER.debug("Invoking the method {} on object of the type {} with the parameters {}",
+                    theDebugLogArguments);
             }
 
             /* Invoke the target method. */
@@ -113,20 +101,17 @@ public class MethodInvokingJob implements TaskJob, Job {
 
                 theMethodInvoker.invoke();
             } catch (final Throwable theException) {
-                /* 
-                 * Catch all exceptions, in order to allow the program to 
+                /*
+                 * Catch all exceptions, in order to allow the program to
                  * continue to run despite exceptions.
                  */
-                LOGGER.error("An error occurred invoking the method "
-                    + theTargetMethodName + " on object of" + " the type "
-                    + theTargetObject.getClass().getName()
-                    + " with the parameters "
-                    + Arrays.asList(theTargetMethodParams).toString(),
-                    theException);
+                LOGGER.error(
+                    "An error occurred invoking the method " + theTargetMethodName + " on object of" + " the type "
+                        + theTargetObject.getClass().getName() + " with the parameters "
+                        + Arrays.asList(theTargetMethodParams).toString(), theException);
             }
 
-            LOGGER.info("Successfully completed executing task {} in group {}",
-                theTaskName, theTaskGroupName);
+            LOGGER.info("Successfully completed executing task {} in group {}", theTaskName, theTaskGroupName);
         }
     }
 }

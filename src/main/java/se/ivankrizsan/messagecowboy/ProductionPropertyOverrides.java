@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Scope;
 
 /**
  * Bean property overrides for the production environment.
- * 
+ *
  * @author Ivan Krizsan
  */
 @Configuration
@@ -41,18 +41,15 @@ public class ProductionPropertyOverrides {
     @Lazy(false)
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public static BeanFactoryPostProcessor propertyOverrideConfigurer() {
-        PropertyOverrideConfigurer theOverrideConfigurer =
-            new PropertyOverrideConfigurer();
+        PropertyOverrideConfigurer theOverrideConfigurer = new PropertyOverrideConfigurer();
 
         final Properties thePropertiesHolder = new Properties();
-        /* Task refresh interval: Every 20 seconds. */
-        thePropertiesHolder.put(
-            "starterService.taskReschedulingCronExpression", "0/20 * * * * ?");
-        /* Transport service configuration refresh interval: Every 30 seconds. */
-        thePropertiesHolder
-            .put(
-                "starterService.transportServiceConfigurationRefreshCronExpression",
-                "0/30 * * * * ?");
+        /* Task refresh interval. */
+        thePropertiesHolder.put("starterService.taskReschedulingCronExpression", "0/20 * * * * ?");
+        /* Transport service configuration refresh interval. */
+        thePropertiesHolder.put("starterService.transportServiceConfigurationRefreshCronExpression", "0/30 * * * * ?");
+        /* Task execution status reports cleanup interval. */
+        thePropertiesHolder.put("starterService.taskExecutionStatusCleanupCronExpression", "0/30 0/15 * * * ?");
 
         theOverrideConfigurer.setProperties(thePropertiesHolder);
         theOverrideConfigurer.setIgnoreInvalidKeys(false);

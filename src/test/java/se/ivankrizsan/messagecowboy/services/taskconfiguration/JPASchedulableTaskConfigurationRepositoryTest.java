@@ -17,14 +17,16 @@
 package se.ivankrizsan.messagecowboy.services.taskconfiguration;
 
 import java.util.List;
-
+import java.util.Map;
+import java.util.Map.Entry;
 import javax.persistence.EntityManagerFactory;
-
+import javax.sql.DataSource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
@@ -32,9 +34,9 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
-
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.testconfig.PersistenceTestConfiguration;
+import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
 
 /**
  * Tests the {@link JPASchedulableTaskConfigurationRepository}.
@@ -44,12 +46,11 @@ import se.ivankrizsan.messagecowboy.testconfig.PersistenceTestConfiguration;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { PersistenceTestConfiguration.class,
     TaskConfigurationServiceConfiguration.class })
-@TransactionConfiguration(transactionManager = "transactionManager",
-    defaultRollback = true)
+@TransactionConfiguration(transactionManager = "transactionManager", defaultRollback = true)
 @Transactional
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class JPASchedulableTaskConfigurationRepositoryTest extends
-    AbstractTransactionalJUnit4SpringContextTests {
+AbstractTransactionalJUnit4SpringContextTests {
     /* Constant(s): */
     private final static String ORIGINAL_CRON_EXPRESSION = "* * * * * *";
     private final static String MODIFIED_CRON_EXPRESSION = "0/15 * * * * *";
@@ -59,6 +60,8 @@ public class JPASchedulableTaskConfigurationRepositoryTest extends
     private SchedulableTaskConfigurationRepository mRepository;
     @Autowired
     private EntityManagerFactory mJpaEntitManagerFactory;
+    @Autowired
+    private DataSource mTestDBDataSource;
 
     /**
      * Prepares for tests by inserting some data into the database.
@@ -66,9 +69,8 @@ public class JPASchedulableTaskConfigurationRepositoryTest extends
     @Before
     public void insertTestData() {
         MessageCowboySchedulableTaskConfig theTask =
-            new MessageCowboySchedulableTaskConfig();
+            AbstractTestBaseClass.createOneTaskConfiguration();
         theTask.setName("FileToFileOne");
-        theTask.setTaskGroupName("TestTaskGroup");
         theTask.setCronExpression(ORIGINAL_CRON_EXPRESSION);
         theTask.setInboundEndpointURI("file://inbox1");
         theTask.setOutboundEndpoint("file://outbox1");
@@ -76,10 +78,8 @@ public class JPASchedulableTaskConfigurationRepositoryTest extends
 
         mRepository.save(theTask);
 
-        theTask = new MessageCowboySchedulableTaskConfig();
+        theTask = AbstractTestBaseClass.createOneTaskConfiguration();
         theTask.setName("FileToFileTwo");
-        theTask.setTaskGroupName("TestTaskGroup");
-        theTask.setCronExpression("* * * * * *");
         theTask.setInboundEndpointURI("file://inbox2");
         theTask.setOutboundEndpoint("file://outbox2");
         theTask.setTaskEnabledFlag(false);
@@ -92,8 +92,7 @@ public class JPASchedulableTaskConfigurationRepositoryTest extends
      */
     @Test
     public void testFind() {
-        final MessageCowboySchedulableTaskConfig theResult =
-            mRepository.findOne("FileToFileOne");
+        final MessageCowboySchedulableTaskConfig theResult = mRepository.findOne("FileToFileOne");
         Assert.assertNotNull(theResult);
     }
 
@@ -103,8 +102,7 @@ public class JPASchedulableTaskConfigurationRepositoryTest extends
      */
     @Test
     public void testFindNonExisting() {
-        final MessageCowboySchedulableTaskConfig theResult =
-            mRepository.findOne("FileToFileFour");
+        final MessageCowboySchedulableTaskConfig theResult = mRepository.findOne("FileToFileFour");
         Assert.assertNull(theResult);
     }
 
@@ -113,8 +111,7 @@ public class JPASchedulableTaskConfigurationRepositoryTest extends
      */
     @Test
     public void testFindAll() {
-        final List<MessageCowboySchedulableTaskConfig> theResultList =
-            mRepository.findAll();
+        final List<MessageCowboySchedulableTaskConfig> theResultList = mRepository.findAll();
         Assert.assertEquals(2, theResultList.size());
     }
 
@@ -123,8 +120,7 @@ public class JPASchedulableTaskConfigurationRepositoryTest extends
      */
     @Test
     public void testFindAllEnabled() {
-        final List<MessageCowboySchedulableTaskConfig> theResultList =
-            mRepository.findAllEnabled();
+        final List<MessageCowboySchedulableTaskConfig> theResultList = mRepository.findAllEnabled();
         Assert.assertEquals(1, theResultList.size());
     }
 
@@ -133,8 +129,7 @@ public class JPASchedulableTaskConfigurationRepositoryTest extends
      */
     @Test
     public void testUpdate() {
-        final List<MessageCowboySchedulableTaskConfig> theResultList =
-            mRepository.findAll();
+        final List<MessageCowboySchedulableTaskConfig> theResultList = mRepository.findAll();
 
         MessageCowboySchedulableTaskConfig theTask = theResultList.get(0);
         final String theTaskName = theTask.getName();
@@ -149,5 +144,26 @@ public class JPASchedulableTaskConfigurationRepositoryTest extends
         Assert.assertNotNull(theTask);
         Assert.assertEquals("The cron expression should have been updated",
             MODIFIED_CRON_EXPRESSION, theTask.getCronExpression());
+    }
+
+    /**
+     * Logs the SQL statements used to create the databasetable in the HSQL database.
+     * Will always succeed as long as no error occurs.
+     */
+    @Test
+    public void logCreateTablesSqlStatements() {
+        final JdbcTemplate theJdbcTemplate = new JdbcTemplate(mTestDBDataSource);
+
+        List<Map<String, Object>> theQueryResult = theJdbcTemplate.queryForList("script");
+        for (Map<String, Object> theMap : theQueryResult) {
+            for (Entry<String, Object> theEntry : theMap.entrySet()) {
+                String theSqlStatement = theEntry.getValue().toString();
+
+                if (theSqlStatement.matches("(?i).*CREATE.*")) {
+                    theSqlStatement = theSqlStatement.replaceAll(" MEMORY", "");
+                    System.out.println("\n" + theSqlStatement);
+                }
+            }
+        }
     }
 }

@@ -47,12 +47,12 @@ import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
  * @author Petter Nordlander
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { CamelTestTaskConfigRefreshConfiguration.class})
+@ContextConfiguration(classes = {CamelTestTaskConfigRefreshConfiguration.class})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class CamelTaskConfigRefreshTest extends AbstractTestBaseClass {
     /* Constant(s): */
     private final static String TEST_TASK_CONFIG_NAME = "FileToFileTwo";
-    
+
     private Logger LOGGER = LoggerFactory.getLogger(CamelTaskConfigRefreshTest.class);
 
     /* Instance variable(s): */
@@ -60,29 +60,27 @@ public class CamelTaskConfigRefreshTest extends AbstractTestBaseClass {
     private TaskConfigurationService mTaskConfigurationService;
     @Autowired
     private MessageCowboyStarterService mMessageCowboyService;
-    
     @Rule
-	public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
-
+    public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
     private File mInputDirectory;
-    
+
     /**
-	 * Setup pre-test-class static settings.
-	 * Sets property to choose Camel as transport service.
-	 */
-	@BeforeClass
-	public static void staticSetup(){
-		System.setProperty("messagecowboy.transport", "camel");
-	}
-	
-	/**
-	 * Sub sequent tests may not want the transport to be set to Camel.
-	 */
-	@AfterClass
-	public static void staticTearDown(){
-		System.clearProperty("messagecowboy.transport");
-	}
-	
+     * Setup pre-test-class static settings.
+     * Sets property to choose Camel as transport service.
+     */
+    @BeforeClass
+    public static void staticSetup() {
+        System.setProperty("messagecowboy.transport", "camel");
+    }
+
+    /**
+     * Sub sequent tests may not want the transport to be set to Camel.
+     */
+    @AfterClass
+    public static void staticTearDown() {
+        System.clearProperty("messagecowboy.transport");
+    }
+
     /**
      * Performs preparations before each test.
      *
@@ -90,28 +88,25 @@ public class CamelTaskConfigRefreshTest extends AbstractTestBaseClass {
      */
     @Before
     public void setUp() throws Exception {
-    	mTestDestinationDirectory = mTemporaryFolder.newFolder("destination");
+        mTestDestinationDirectory = mTemporaryFolder.newFolder("destination");
         mInputDirectory = mTemporaryFolder.newFolder("input");
-        mTestFile = new File(mInputDirectory,"inputfile.txt");
+        mTestFile = new File(mInputDirectory, "inputfile.txt");
         FileUtils.writeStringToFile(mTestFile, TEST_FILE_CONTENTS);
-        LOGGER.info("Content in input before");
-        for(Object o :FileUtils.listFiles(mInputDirectory, null, false)){
-        	File f = (File)o;
-        	LOGGER.info("File: {}",f.toString());
+        LOGGER.info("Files in input directory before task execution");
+        for (Object theInputDirectoryFileObject : FileUtils.listFiles(mInputDirectory, null, false)) {
+            File theInputDirectoryFile = (File) theInputDirectoryFileObject;
+            LOGGER.info("File: {}", theInputDirectoryFile.toString());
         }
 
         /* Create endpoint URIs for the destination directory. */
         final String theDestDirPath = mTestDestinationDirectory.getAbsolutePath();
 
         /* Original configuration contains a non-existing inbound directory. */
-        final String theInboundFileEndpointUri =
-            "file://no-such-directory";
-        final String theOutboundFileEndpointUri =
-            "file://" + theDestDirPath;
+        final String theInboundFileEndpointUri = "file://no-such-directory";
+        final String theOutboundFileEndpointUri = "file://" + theDestDirPath;
 
         /* Insert task configuration into database. */
-        MessageCowboySchedulableTaskConfig theTask =
-            new MessageCowboySchedulableTaskConfig();
+        MessageCowboySchedulableTaskConfig theTask = new MessageCowboySchedulableTaskConfig();
         theTask.setName(TEST_TASK_CONFIG_NAME);
         theTask.setTaskGroupName("TestTasksGroup");
         theTask.setCronExpression("* * * * * ?");
@@ -130,7 +125,7 @@ public class CamelTaskConfigRefreshTest extends AbstractTestBaseClass {
     /**
      * Tests modifying the task configuration before moving the file is
      * performed.
-     * 
+     *
      * @throws Exception If error occurs during test. Indicates test failure.
      */
     @Test
@@ -138,10 +133,9 @@ public class CamelTaskConfigRefreshTest extends AbstractTestBaseClass {
         /* Modify the task configuration before task is executed. */
         final MessageCowboySchedulableTaskConfig theTaskConfigToModify =
             mTaskConfigurationService.find(TEST_TASK_CONFIG_NAME);
-        
-        final String theInboundFileEndpointUri 
-        	= "file://" + mInputDirectory.getAbsolutePath() +"?delete=true";
-        
+
+        final String theInboundFileEndpointUri = "file://" + mInputDirectory.getAbsolutePath() + "?delete=true";
+
         theTaskConfigToModify.setInboundEndpointURI(theInboundFileEndpointUri);
         mTaskConfigurationService.save(theTaskConfigToModify);
 
@@ -155,7 +149,6 @@ public class CamelTaskConfigRefreshTest extends AbstractTestBaseClass {
             theException.printStackTrace();
         }
 
-        
         verifySuccessfulFileMove();
     }
 }

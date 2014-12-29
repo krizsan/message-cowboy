@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import se.ivankrizsan.messagecowboy.services.scheduling.SchedulingServiceConfiguration;
 import se.ivankrizsan.messagecowboy.services.starter.MessageCowboyStarterServiceConfiguration;
 import se.ivankrizsan.messagecowboy.services.taskconfiguration.TaskConfigurationServiceConfiguration;
+import se.ivankrizsan.messagecowboy.services.taskexecutionstatus.TaskExecutionStatusServiceConfiguration;
 import se.ivankrizsan.messagecowboy.services.transport.TransportServiceConfiguration;
 
 /**
@@ -41,10 +42,9 @@ import se.ivankrizsan.messagecowboy.services.transport.TransportServiceConfigura
 @Configuration
 @PropertySource("file:message-cowboy-configuration.properties")
 @EnableTransactionManagement
-@Import({ PersistenceConfiguration.class, EmbeddedActiveMQConfiguration.class,
-    TransportServiceConfiguration.class, SchedulingServiceConfiguration.class,
-    MessageCowboyStarterServiceConfiguration.class,
-    TaskConfigurationServiceConfiguration.class })
+@Import({PersistenceConfiguration.class, EmbeddedActiveMQConfiguration.class, TransportServiceConfiguration.class,
+    SchedulingServiceConfiguration.class, MessageCowboyStarterServiceConfiguration.class,
+    TaskConfigurationServiceConfiguration.class, TaskExecutionStatusServiceConfiguration.class})
 public class MessageCowboyConfiguration {
 
     /**
@@ -53,10 +53,9 @@ public class MessageCowboyConfiguration {
      * property values using the @Value annotation.
      */
     @Bean
-    public static PropertySourcesPlaceholderConfigurer
-        propertySourcesPlaceholderConfigurer() {
-        PropertySourcesPlaceholderConfigurer thePropertyPlaceholderConfigurer 
-        	= new PropertySourcesPlaceholderConfigurer();
+    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+        PropertySourcesPlaceholderConfigurer thePropertyPlaceholderConfigurer =
+            new PropertySourcesPlaceholderConfigurer();
         thePropertyPlaceholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
         return thePropertyPlaceholderConfigurer;
     }
@@ -75,12 +74,11 @@ public class MessageCowboyConfiguration {
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public List<String> muleTransportServiceConfigLocations() {
         final List<String> theLocationsList = new ArrayList<String>();
-        theLocationsList.add("file:production-configurations/connectors/*.xml");
-        theLocationsList
-            .add("file:production-configurations/transport-service-configurations/*.xml");
+        theLocationsList.add("file:production-configurations/mule/connectors/*.xml");
+        theLocationsList.add("file:production-configurations/mule/transport-service-configurations/*.xml");
         return theLocationsList;
     }
-    
+
     /**
      * Override.
      * Location of component configuration files used for transport in the 
@@ -92,11 +90,9 @@ public class MessageCowboyConfiguration {
      */
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public List<String> camelTransportServiceConfigLocations(){
-    	final List<String> theLocationsList = new ArrayList<String>();
-    	theLocationsList.add("file:production-configurations/camel/*.xml");
-//        theLocationsList
-//            .add("file:production-configurations/transport-service-configurations/*.xml");
-        return theLocationsList;	
+    public List<String> camelTransportServiceConfigLocations() {
+        final List<String> theLocationsList = new ArrayList<String>();
+        theLocationsList.add("file:production-configurations/camel/*.xml");
+        return theLocationsList;
     }
 }

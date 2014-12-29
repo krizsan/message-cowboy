@@ -19,15 +19,22 @@ package se.ivankrizsan.messagecowboy.testutils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.UUID;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestName;
-import org.mule.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
+import se.ivankrizsan.messagecowboy.domain.valueobjects.TaskExecutionStatus;
+import se.ivankrizsan.messagecowboy.domain.valueobjects.TransportProperty;
 
 /**
  * Abstract base-class containing methods and data used in more than one test.
@@ -38,14 +45,11 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractTestBaseClass {
     /* Constant(s): */
-    static final Logger LOGGER = LoggerFactory
-        .getLogger(AbstractTestBaseClass.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(AbstractTestBaseClass.class);
     /** Contents of test-file. */
-    protected final static String TEST_FILE_CONTENTS =
-        "Some test file contents 1234 åäö";
-    protected final static String METHOD_HEADER_LINE =
-        "*************************************************"
-            + "*************************************************";
+    protected final static String TEST_FILE_CONTENTS = "Some test file contents 1234 åäö";
+    protected final static String METHOD_HEADER_LINE = "*************************************************"
+        + "*************************************************";
 
     /* Instance variable(s): */
     /** Source file that can be requested. */
@@ -101,9 +105,7 @@ public abstract class AbstractTestBaseClass {
      * @return Destination directory file path.
      */
     protected String createTestDestinationDirectory() {
-        mTestDestinationDirectory =
-            new File("moverTaskJobTestDestDir" + UUID.getUUID()
-                + File.separator);
+        mTestDestinationDirectory = new File("moverTaskJobTestDestDir" + UUID.randomUUID().toString() + File.separator);
 
         if (mTestDestinationDirectory.exists()) {
             try {
@@ -117,8 +119,7 @@ public abstract class AbstractTestBaseClass {
         if (!theDirCreatedFlag) {
             throw new Error("Destination directory not created!");
         }
-        final String theDestDirPath =
-            mTestDestinationDirectory.getAbsolutePath();
+        final String theDestDirPath = mTestDestinationDirectory.getAbsolutePath();
 
         LOGGER.info("Destination directory: {}", theDestDirPath);
 
@@ -146,7 +147,7 @@ public abstract class AbstractTestBaseClass {
      * @throws IOException If error occurs creating or writing to input file.
      */
     protected String createTestFileWithContent() throws IOException {
-        mTestFile = new File("testInputDir" + UUID.getUUID(), "inputfile.txt");
+        mTestFile = new File("testInputDir" + UUID.randomUUID().toString(), "inputfile.txt");
         final boolean theDirCreatedFlag = mTestFile.getParentFile().mkdir();
         if (!theDirCreatedFlag) {
             throw new IOException("Test-file parent directory not created");
@@ -155,15 +156,13 @@ public abstract class AbstractTestBaseClass {
         if (!theTestFileCreatedFlag) {
             throw new IOException("Test-file not created");
         }
-        final String theInputDirPath =
-            mTestFile.getParentFile().getAbsolutePath();
+        final String theInputDirPath = mTestFile.getParentFile().getAbsolutePath();
 
         final FileWriter theInputFileWriter = new FileWriter(mTestFile);
         theInputFileWriter.write(TEST_FILE_CONTENTS);
         theInputFileWriter.close();
 
-        LOGGER.info("Test file directory: {}", mTestFile.getParentFile()
-            .getAbsolutePath());
+        LOGGER.info("Test file directory: {}", mTestFile.getParentFile().getAbsolutePath());
 
         return theInputDirPath;
     }
@@ -191,21 +190,16 @@ public abstract class AbstractTestBaseClass {
     protected void verifySuccessfulFileMove() throws IOException {
         /* Verify contents of source and destination directories. */
         final File[] theDestDirFiles = mTestDestinationDirectory.listFiles();
-        Assert.assertEquals(
-            "There should be one file in the destination directory", 1,
-            theDestDirFiles.length);
-        Assert.assertTrue("File should not be left in source directory",
-            !mTestFile.exists());
+        Assert.assertEquals("There should be one file in the destination directory", 1, theDestDirFiles.length);
+        Assert.assertTrue("File should not be left in source directory", !mTestFile.exists());
 
         /* Verify name of moved file. */
-        Assert.assertEquals("Original file name should be preserved", mTestFile
-            .getName(), theDestDirFiles[0].getName());
+        Assert
+            .assertEquals("Original file name should be preserved", mTestFile.getName(), theDestDirFiles[0].getName());
 
         /* Verify contents of moved file. */
-        final String theMovedFileContents =
-            FileUtils.readFileToString(theDestDirFiles[0]);
-        Assert.assertEquals("Contents of moved file should be preserved",
-            TEST_FILE_CONTENTS, theMovedFileContents);
+        final String theMovedFileContents = FileUtils.readFileToString(theDestDirFiles[0]);
+        Assert.assertEquals("Contents of moved file should be preserved", TEST_FILE_CONTENTS, theMovedFileContents);
     }
 
     /**
@@ -219,5 +213,32 @@ public abstract class AbstractTestBaseClass {
         } catch (final InterruptedException theException) {
             /* Ignore exceptions. */
         }
+    }
+
+    /**
+     * Creates one task configuration object and sets some basic configuration on the new
+     * configuration.
+     *
+     * @return New task configuration object.
+     */
+    public static MessageCowboySchedulableTaskConfig createOneTaskConfiguration() {
+        final MessageCowboySchedulableTaskConfig theTaskConfiguration = new MessageCowboySchedulableTaskConfig();
+        final Date theStartDate = new Date();
+        /* End date is 24 hours later than the start date. */
+        final Date theEndDate = new Date(theStartDate.getTime() + 86400000L);
+
+        theTaskConfiguration.setName("Task name " + UUID.randomUUID().toString());
+        theTaskConfiguration.setTaskGroupName("Test Tasks Group");
+        theTaskConfiguration.setCronExpression("* * * * * ?");
+        theTaskConfiguration.setStartDate(theStartDate);
+        theTaskConfiguration.setEndDate(theEndDate);
+        theTaskConfiguration.setInboundEndpointURI("http://www.ivankrizsan.se/inboundendpoint");
+        theTaskConfiguration.setInboundTimeout(5000L);
+        theTaskConfiguration.setOutboundEndpoint("http://www.ivankrizsan.se/outboundendpoint");
+        theTaskConfiguration.setTaskEnabledFlag(true);
+        theTaskConfiguration.setTaskExecutionStatuses(new ArrayList<TaskExecutionStatus>());
+        theTaskConfiguration.setTransportProperties(new ArrayList<TransportProperty>());
+
+        return theTaskConfiguration;
     }
 }

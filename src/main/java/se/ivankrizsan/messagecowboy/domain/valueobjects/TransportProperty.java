@@ -36,24 +36,24 @@ public class TransportProperty {
     /** Name of property. */
     @Id
     @Column(nullable = false)
-    protected String mName;
+    protected String propertyName;
     /** Value of property. */
     @Column(nullable = false)
-    protected String mValue;
+    protected String propertyValue;
 
     public String getName() {
-        return mName;
+        return propertyName;
     }
 
     public void setName(final String inName) {
-        mName = inName;
+        propertyName = inName;
     }
 
     public String getValue() {
-        return mValue;
+        return propertyValue;
     }
 
     public void setValue(final String inValue) {
-        mValue = inValue;
+        propertyValue = inValue;
     }
 }
