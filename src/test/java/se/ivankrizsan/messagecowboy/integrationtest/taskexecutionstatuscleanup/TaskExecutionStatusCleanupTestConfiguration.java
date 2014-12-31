@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package se.ivankrizsan.messagecowboy.integrationtest;
+package se.ivankrizsan.messagecowboy.integrationtest.taskexecutionstatuscleanup;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.mockito.Mockito;
+import org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.PropertyOverrideConfigurer;
@@ -31,8 +31,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 
 import se.ivankrizsan.messagecowboy.MessageCowboyConfiguration;
-import se.ivankrizsan.messagecowboy.services.taskexecutionstatus.TaskExecutionStatusService;
 import se.ivankrizsan.messagecowboy.testconfig.PersistenceTestConfiguration;
+import se.ivankrizsan.messagecowboy.testutils.InvocationLoggerMethodInterceptor;
 
 /**
  * Spring configuration class for the {@code TaskExecutionStatusCleanupTest} integration test.
@@ -62,17 +62,29 @@ public class TaskExecutionStatusCleanupTestConfiguration {
         return theLocationsList;
     }
 
+    @Bean
+    public InvocationLoggerMethodInterceptor invocationLoggerInterceptor() {
+        final InvocationLoggerMethodInterceptor theInterceptor = new InvocationLoggerMethodInterceptor();
+        return theInterceptor;
+    }
+
     /**
-     * Override.
-     * Mock of the task execution status service, in order to be able to determine how many
-     * times it has been invoked.
+     * Creates a proxy for the task execution status service that logs method invocation on the service.
+     *
+     * @return Task execution status service proxy creator.
      */
     @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public TaskExecutionStatusService taskExecutionStatusService() {
-        final TaskExecutionStatusService theService = Mockito.mock(TaskExecutionStatusService.class);
+    public BeanNameAutoProxyCreator taskExecutionStatusServiceProxyCreator() {
+        final BeanNameAutoProxyCreator theProxyCreator = new BeanNameAutoProxyCreator();
+        final String[] theProxiedBeanNames = new String[1];
+        theProxiedBeanNames[0] = "taskExecutionStatusService";
+        theProxyCreator.setBeanNames(theProxiedBeanNames);
 
-        return theService;
+        final String[] theInterceptorNames = new String[1];
+        theInterceptorNames[0] = "invocationLoggerInterceptor";
+        theProxyCreator.setInterceptorNames(theInterceptorNames);
+
+        return theProxyCreator;
     }
 
     /**

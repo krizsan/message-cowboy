@@ -24,13 +24,10 @@ import java.util.List;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultExchange;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,47 +43,37 @@ import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
 
 /**
  * Test {@link CamelTransportService}.
- * @author Petter Nordlander
  *
+ * @author Petter Nordlander
+ * @author Ivan Krizsan
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { CamelTransportServiceTestConfiguration.class })
+@ContextConfiguration(classes = {CamelTransportServiceTestConfiguration.class})
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class CamelTransportServiceTest extends AbstractTestBaseClass {
-	
-	private static final Logger LOGGER = LoggerFactory.getLogger(CamelTransportServiceTest.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CamelTransportServiceTest.class);
     private static final String TEST_MESSAGE_PAYLOAD = "some payload åäöÅÄÖ";
 
     @Autowired
     private CamelTransportService mServiceUnderTest;
     private String mInboundFileEndpointUri;
     private String mOutboundFileEndpointUri;
-    
-    /**
-     * Create and Auto delete a base folder for files for each test method.
-     */
-    @Rule
-    public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
 
     /**
      * Performs preparations before each test.
      *
-     * @throws Exception If error occurs creating instance of service under
-     * test.
+     * @throws Exception If error occurs creating instance of service under test.
      */
     @Before
     public void setUp() throws Exception {
-        mTestDestinationDirectory = mTemporaryFolder.newFolder("destination");
-        File theInputFolder = mTemporaryFolder.newFolder("input");
-        mTestFile = new File(theInputFolder,"inputfile.txt");
-        FileUtils.writeStringToFile(mTestFile, TEST_FILE_CONTENTS);
+        createTestDestinationDirectory();
+        final String theInputFolderPath = createTestFileWithContent();
 
         /* Create endpoint URIs for the destination and source test directories. */
-        final String theInputDirPath =
-        	theInputFolder.getAbsolutePath().replaceAll("\\" + File.separator, "/");
+        final String theInputDirPath = theInputFolderPath.replaceAll("\\" + File.separator, "/");
         final String theDestDirPath =
-            mTestDestinationDirectory.getAbsolutePath().replaceAll(
-                "\\" + File.separator, "/");
+            mTestDestinationDirectory.getAbsolutePath().replaceAll("\\" + File.separator, "/");
 
         mInboundFileEndpointUri = "file://" + theInputDirPath;
         mOutboundFileEndpointUri = "file://" + theDestDirPath;
@@ -110,11 +97,11 @@ public class CamelTransportServiceTest extends AbstractTestBaseClass {
     public void testSendToFileEndpoint() {
         /* Start the Camel transport service. */
         mServiceUnderTest.start();
-        
+
         Exchange theExchange = new DefaultExchange(mServiceUnderTest.mCamelContext);
         Message theMessage = theExchange.getIn();
         theMessage.setBody(TEST_MESSAGE_PAYLOAD);
-        
+
         /* Set name of file to be written to destination directory. */
         theMessage.setHeader(Exchange.FILE_NAME, "testfile.txt");
 
@@ -125,9 +112,7 @@ public class CamelTransportServiceTest extends AbstractTestBaseClass {
 
         /* Verify outcome. */
         final File[] theDestDirFiles = mTestDestinationDirectory.listFiles();
-        Assert.assertEquals(
-            "There should be one file in the destination directory", 1,
-            theDestDirFiles.length);
+        Assert.assertEquals("There should be one file in the destination directory", 1, theDestDirFiles.length);
     }
 
     /**
@@ -137,20 +122,15 @@ public class CamelTransportServiceTest extends AbstractTestBaseClass {
     public void testReceiveFromFileEndpoint() {
         /* Start the Camel transport service. */
         mServiceUnderTest.start();
-        LOGGER.info("Trying to receive a file from {}",mInboundFileEndpointUri);
+        LOGGER.info("Trying to receive a file from {}", mInboundFileEndpointUri);
         @SuppressWarnings("unchecked")
-		final MoverMessage<Exchange> theReceivedMessage =
-            mServiceUnderTest.receive(mInboundFileEndpointUri, 5000);
+        final MoverMessage<Exchange> theReceivedMessage = mServiceUnderTest.receive(mInboundFileEndpointUri, 5000);
 
         /* Verify outcome. */
-        Assert.assertNotNull("A message should have been received",
-            theReceivedMessage);
-        final Exchange theReceivedExchange =
-            theReceivedMessage.getMessage();
-        Assert.assertNotNull("The received message should contain a payload",
-            theReceivedMessage.getMessage());
-        Assert.assertNotNull("The received message should contain a payload",
-            theReceivedExchange.getIn().getBody());
+        Assert.assertNotNull("A message should have been received", theReceivedMessage);
+        final Exchange theReceivedExchange = theReceivedMessage.getMessage();
+        Assert.assertNotNull("The received message should contain a payload", theReceivedMessage.getMessage());
+        Assert.assertNotNull("The received message should contain a payload", theReceivedExchange.getIn().getBody());
     }
 
     /**
@@ -161,19 +141,14 @@ public class CamelTransportServiceTest extends AbstractTestBaseClass {
         /* Start the Camel transport service. */
         mServiceUnderTest.start();
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException theException) {
-            /* Ignore exceptions. */
-        }
+        delay(1000L);
 
         performAndVerifyJmsTest();
     }
 
     private void performAndVerifyJmsTest() {
-        final String theJmsEndpointUri =
-            "jms://queue:cameltransportservice.queue";
-        
+        final String theJmsEndpointUri = "jms://queue:cameltransportservice.queue";
+
         final Exchange theExchange = new DefaultExchange(mServiceUnderTest.getCamelContext());
         theExchange.getIn().setBody(TEST_MESSAGE_PAYLOAD);
         final CamelMoverMessage theMoverMessage = new CamelMoverMessage(theExchange);
@@ -182,18 +157,14 @@ public class CamelTransportServiceTest extends AbstractTestBaseClass {
         delay(1000);
 
         @SuppressWarnings("unchecked")
-		final MoverMessage<Exchange> theReceivedMessage =
-            mServiceUnderTest.receive(theJmsEndpointUri, 5000);
+        final MoverMessage<Exchange> theReceivedMessage = mServiceUnderTest.receive(theJmsEndpointUri, 5000);
 
         /* Verify outcome. */
-        Assert.assertNotNull("A message should have been received",
-            theReceivedMessage);
-        final Exchange theReceivedExchange =
-            theReceivedMessage.getMessage();
-        Assert.assertNotNull("The received message should contain a payload",
-            theReceivedMessage.getMessage());
-        Assert.assertEquals("Payload of message should be unaltered",
-            TEST_MESSAGE_PAYLOAD, theReceivedExchange.getIn().getBody());
+        Assert.assertNotNull("A message should have been received", theReceivedMessage);
+        final Exchange theReceivedExchange = theReceivedMessage.getMessage();
+        Assert.assertNotNull("The received message should contain a payload", theReceivedMessage.getMessage());
+        Assert.assertEquals("Payload of message should be unaltered", TEST_MESSAGE_PAYLOAD, theReceivedExchange.getIn()
+            .getBody());
     }
 
     /**
@@ -202,9 +173,7 @@ public class CamelTransportServiceTest extends AbstractTestBaseClass {
     @Test
     public void testRestartService() {
         mServiceUnderTest.start();
-
         mServiceUnderTest.stop();
-
         mServiceUnderTest.start();
     }
 
@@ -213,21 +182,18 @@ public class CamelTransportServiceTest extends AbstractTestBaseClass {
      *
      * @throws IOException If error occurs refreshing connectors. Indicates test failure.
      */
-  //  @Test
+    @Test
     public void testConnectorResourcesRefresh() throws IOException {
         /* Set initial list of connector resources to file connector only. */
         final List<String> theLocationsList = new ArrayList<String>();
         theLocationsList.add("classpath:connectors/file-connectors.xml");
-        mServiceUnderTest
-        .setConnectorsResourcesLocationPattern(theLocationsList);
+        mServiceUnderTest.setConnectorsResourcesLocationPattern(theLocationsList);
 
         mServiceUnderTest.start();
 
         /* Add the JMS connector after the service has been started. */
-        theLocationsList
-        .add("classpath:connectors/camel/jms-connector-with-embedded-amq.xml");
-        mServiceUnderTest
-        .setConnectorsResourcesLocationPattern(theLocationsList);
+        theLocationsList.add("classpath:connectors/camel/jms-connector-with-embedded-amq.xml");
+        mServiceUnderTest.setConnectorsResourcesLocationPattern(theLocationsList);
 
         mServiceUnderTest.refreshConnectors();
 

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package se.ivankrizsan.messagecowboy.integrationtest;
+package se.ivankrizsan.messagecowboy.integrationtest.camel;
 
 import java.io.File;
 import java.util.Date;
@@ -23,9 +23,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +43,7 @@ import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
  * configuration is modified between startup and the execution of the task.
  *
  * @author Petter Nordlander
+ * @author Ivan Krizsan
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {CamelTestTaskConfigRefreshConfiguration.class})
@@ -60,9 +59,6 @@ public class CamelTaskConfigRefreshTest extends AbstractTestBaseClass {
     private TaskConfigurationService mTaskConfigurationService;
     @Autowired
     private MessageCowboyStarterService mMessageCowboyService;
-    @Rule
-    public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
-    private File mInputDirectory;
 
     /**
      * Setup pre-test-class static settings.
@@ -88,18 +84,14 @@ public class CamelTaskConfigRefreshTest extends AbstractTestBaseClass {
      */
     @Before
     public void setUp() throws Exception {
-        mTestDestinationDirectory = mTemporaryFolder.newFolder("destination");
-        mInputDirectory = mTemporaryFolder.newFolder("input");
-        mTestFile = new File(mInputDirectory, "inputfile.txt");
-        FileUtils.writeStringToFile(mTestFile, TEST_FILE_CONTENTS);
+        final String theDestDirPath = createTestDestinationDirectory();
+        createTestFileWithContent();
+
         LOGGER.info("Files in input directory before task execution");
-        for (Object theInputDirectoryFileObject : FileUtils.listFiles(mInputDirectory, null, false)) {
+        for (Object theInputDirectoryFileObject : FileUtils.listFiles(mTestInputDirectory, null, false)) {
             File theInputDirectoryFile = (File) theInputDirectoryFileObject;
             LOGGER.info("File: {}", theInputDirectoryFile.toString());
         }
-
-        /* Create endpoint URIs for the destination directory. */
-        final String theDestDirPath = mTestDestinationDirectory.getAbsolutePath();
 
         /* Original configuration contains a non-existing inbound directory. */
         final String theInboundFileEndpointUri = "file://no-such-directory";
@@ -134,7 +126,7 @@ public class CamelTaskConfigRefreshTest extends AbstractTestBaseClass {
         final MessageCowboySchedulableTaskConfig theTaskConfigToModify =
             mTaskConfigurationService.find(TEST_TASK_CONFIG_NAME);
 
-        final String theInboundFileEndpointUri = "file://" + mInputDirectory.getAbsolutePath() + "?delete=true";
+        final String theInboundFileEndpointUri = "file://" + mTestInputDirectory.getAbsolutePath() + "?delete=true";
 
         theTaskConfigToModify.setInboundEndpointURI(theInboundFileEndpointUri);
         mTaskConfigurationService.save(theTaskConfigToModify);
@@ -143,11 +135,7 @@ public class CamelTaskConfigRefreshTest extends AbstractTestBaseClass {
         mMessageCowboyService.scheduleTasks();
 
         /* Just need to wait for the task to execute as scheduled. */
-        try {
-            Thread.sleep(4000);
-        } catch (final InterruptedException theException) {
-            theException.printStackTrace();
-        }
+        delay(4000L);
 
         verifySuccessfulFileMove();
     }

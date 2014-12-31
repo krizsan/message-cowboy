@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package se.ivankrizsan.messagecowboy.integrationtest;
+package se.ivankrizsan.messagecowboy.integrationtest.mule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,32 +29,31 @@ import se.ivankrizsan.messagecowboy.MessageCowboyConfiguration;
 import se.ivankrizsan.messagecowboy.testconfig.PersistenceTestConfiguration;
 
 /**
- * Spring configuration class for the {@link CamelTaskConfigRefreshTest}
+ * Spring configuration class for the {@code MuleTaskConfigRefreshTest}
  * integration test.
  * 
- * @author Petter Nordlander
+ * @author Ivan Krizsan
  */
 @Configuration
 @Import({ MessageCowboyConfiguration.class, PersistenceTestConfiguration.class })
-public class CamelTestTaskConfigRefreshConfiguration {
+public class MuleTaskConfigRefreshTestConfiguration {
 
     /**
      * Override.
      * Location of connector and transport service configuration files
-     * for the Camel implementation of the transport service.<br/>
+     * for the Mule implementation of the transport service.<br/>
      * Do not include the file containing JMS connector(s), since
      * the tests will use an embedded ActiveMQ broker with an associated
      * JMS connector defined in a special file.
      * 
-     * @return List of locations where the Camel transport service is to
+     * @return List of locations where the Mule transport service is to
      * search for configuration files.
      */
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public List<String> camelTransportServiceConfigLocations() {
+    public List<String> muleTransportServiceConfigLocations() {
         final List<String> theLocationsList = new ArrayList<String>();
-        theLocationsList.add("classpath:connectors/camel/file-connectors.xml");
+        theLocationsList.add("classpath:connectors/file-connectors.xml");
         return theLocationsList;
     }
-    
 }

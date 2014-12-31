@@ -14,12 +14,11 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package se.ivankrizsan.messagecowboy.integrationtest;
+package se.ivankrizsan.messagecowboy.integrationtest.mule;
 
 import java.io.File;
 import java.util.Date;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,7 +41,7 @@ import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
  * @author Ivan Krizsan
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { MuleTaskConfigRefreshTestConfiguration.class })
+@ContextConfiguration(classes = {MuleTaskConfigRefreshTestConfiguration.class})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class MuleTaskConfigRefreshTest extends AbstractTestBaseClass {
     /* Constant(s): */
@@ -66,19 +65,15 @@ public class MuleTaskConfigRefreshTest extends AbstractTestBaseClass {
 
         /* Create endpoint URIs for the destination directory. */
         final String theDestDirPath =
-            mTestDestinationDirectory.getAbsolutePath().replaceAll(
-                "\\" + File.separator, "/");
+            mTestDestinationDirectory.getAbsolutePath().replaceAll("\\" + File.separator, "/");
 
         /* Original configuration contains a non-existing inbound directory. */
-        final String theInboundFileEndpointUri =
-            "file://no-such-directory/?connector=nonStreamingFileConnectorInbound";
+        final String theInboundFileEndpointUri = "file://no-such-directory/?connector=nonStreamingFileConnectorInbound";
         final String theOutboundFileEndpointUri =
-            "file://" + theDestDirPath
-            + "?connector=nonStreamingFileConnectorOutbound";
+            "file://" + theDestDirPath + "?connector=nonStreamingFileConnectorOutbound";
 
         /* Insert task configuration into database. */
-        MessageCowboySchedulableTaskConfig theTask =
-            new MessageCowboySchedulableTaskConfig();
+        MessageCowboySchedulableTaskConfig theTask = new MessageCowboySchedulableTaskConfig();
         theTask.setName(TEST_TASK_CONFIG_NAME);
         theTask.setTaskGroupName("TestTasksGroup");
         theTask.setCronExpression("* * * * * ?");
@@ -95,17 +90,6 @@ public class MuleTaskConfigRefreshTest extends AbstractTestBaseClass {
     }
 
     /**
-     * Cleans up after each test.
-     *
-     * @throws Exception If error occurs.
-     */
-    @After
-    public void cleanUp() throws Exception {
-        deleteTestFile();
-        deleteTestDestinationDirectory();
-    }
-
-    /**
      * Tests modifying the task configuration before moving the file is
      * performed.
      *
@@ -116,11 +100,9 @@ public class MuleTaskConfigRefreshTest extends AbstractTestBaseClass {
         /* Modify the task configuration before task is executed. */
         final MessageCowboySchedulableTaskConfig theTaskConfigToModify =
             mTaskConfigurationService.find(TEST_TASK_CONFIG_NAME);
-        final String theInputDirPath =
-            mTestFile.getAbsolutePath().replaceAll("\\" + File.separator, "/");
+        final String theInputDirPath = mTestFile.getAbsolutePath().replaceAll("\\" + File.separator, "/");
         final String theInboundFileEndpointUri =
-            "file://" + theInputDirPath
-            + "?connector=nonStreamingFileConnectorInbound";
+            "file://" + theInputDirPath + "?connector=nonStreamingFileConnectorInbound";
         theTaskConfigToModify.setInboundEndpointURI(theInboundFileEndpointUri);
         mTaskConfigurationService.save(theTaskConfigToModify);
 
@@ -128,11 +110,7 @@ public class MuleTaskConfigRefreshTest extends AbstractTestBaseClass {
         mMessageCowboyService.scheduleTasks();
 
         /* Just need to wait for the task to execute as scheduled. */
-        try {
-            Thread.sleep(2000);
-        } catch (final InterruptedException theException) {
-            theException.printStackTrace();
-        }
+        delay(2000L);
 
         verifySuccessfulFileMove();
     }

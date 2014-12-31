@@ -14,13 +14,12 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package se.ivankrizsan.messagecowboy.integrationtest;
+package se.ivankrizsan.messagecowboy.integrationtest.mule;
 
 import java.io.File;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -99,17 +98,6 @@ public class MuleSuccessfulOneTaskTest extends AbstractTestBaseClass {
     }
 
     /**
-     * Cleans up after each test.
-     *
-     * @throws Exception If error occurs.
-     */
-    @After
-    public void cleanUp() throws Exception {
-        deleteTestFile();
-        deleteTestDestinationDirectory();
-    }
-
-    /**
      * Tests the successful completion of a scheduled job that is to move a
      * file from one directory to another.
      *
@@ -118,11 +106,7 @@ public class MuleSuccessfulOneTaskTest extends AbstractTestBaseClass {
     @Test
     public void testSuccessfulFileMove() throws Exception {
         /* Just need to wait for the task to execute as scheduled. */
-        try {
-            Thread.sleep(1500);
-        } catch (final InterruptedException theException) {
-            theException.printStackTrace();
-        }
+        delay(1500L);
 
         verifySuccessfulFileMove();
 

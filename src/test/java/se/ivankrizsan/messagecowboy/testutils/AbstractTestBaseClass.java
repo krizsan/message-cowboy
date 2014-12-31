@@ -17,7 +17,6 @@
 package se.ivankrizsan.messagecowboy.testutils;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,6 +27,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,11 +54,20 @@ public abstract class AbstractTestBaseClass {
     /* Instance variable(s): */
     /** Source file that can be requested. */
     protected File mTestFile;
-    /** Destination directory to which files can be dispatched. */
+    /** Test input directory. */
+    protected File mTestInputDirectory;
+    /** Test destination directory. */
     protected File mTestDestinationDirectory;
     /** Name of test method. JUnit require this instance variable to be public. */
     @Rule
     public TestName mJunitTestMethodName = new TestName();
+    /**
+     * Temporary folder to contain input and destination directories for file move tests.
+     * This folder and all of its contents will automatically be deleted after each test method.
+     * JUnit require this instance variable to be public.
+     */
+    @Rule
+    public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
 
     /**
      * Logs the name of the test-class and test-method before a test-method
@@ -99,86 +108,33 @@ public abstract class AbstractTestBaseClass {
     }
 
     /**
-     * Creates a test destination directory.<br/>
-     * Any existing directory with the same name will be deleted.
+     * Creates a test destination directory in the temporary test directory.
      *
      * @return Destination directory file path.
+     * @throws IOException If error occurs creating test destination directory.
      */
-    protected String createTestDestinationDirectory() {
-        mTestDestinationDirectory = new File("moverTaskJobTestDestDir" + UUID.randomUUID().toString() + File.separator);
+    protected String createTestDestinationDirectory() throws IOException {
+        mTestDestinationDirectory = mTemporaryFolder.newFolder("destination");
 
-        if (mTestDestinationDirectory.exists()) {
-            try {
-                FileUtils.deleteDirectory(mTestDestinationDirectory);
-            } catch (final IOException theException) {
-                LOGGER.error("Error deleting output directory", theException);
-            }
-        }
-
-        final boolean theDirCreatedFlag = mTestDestinationDirectory.mkdir();
-        if (!theDirCreatedFlag) {
-            throw new Error("Destination directory not created!");
-        }
         final String theDestDirPath = mTestDestinationDirectory.getAbsolutePath();
-
         LOGGER.info("Destination directory: {}", theDestDirPath);
-
         return theDestDirPath;
     }
 
     /**
-     * Deletes the test destination directory.<br/>
-     * If the directory does not exist, do nothing.
-     */
-    protected void deleteTestDestinationDirectory() {
-        if (mTestDestinationDirectory != null) {
-            try {
-                FileUtils.deleteDirectory(mTestDestinationDirectory);
-            } catch (final IOException theException) {
-                LOGGER.debug("Error deleting test destination directory");
-            }
-        }
-    }
-
-    /**
-     * Creates a test file in a new directory and write some contents to it.
+     * Creates an input directory that contains a test-file with some contents.
      *
      * @return Path to directory containing input file.
-     * @throws IOException If error occurs creating or writing to input file.
+     * @throws IOException If error occurs creating input directory or file or writing to input file.
      */
     protected String createTestFileWithContent() throws IOException {
-        mTestFile = new File("testInputDir" + UUID.randomUUID().toString(), "inputfile.txt");
-        final boolean theDirCreatedFlag = mTestFile.getParentFile().mkdir();
-        if (!theDirCreatedFlag) {
-            throw new IOException("Test-file parent directory not created");
-        }
-        final boolean theTestFileCreatedFlag = mTestFile.createNewFile();
-        if (!theTestFileCreatedFlag) {
-            throw new IOException("Test-file not created");
-        }
-        final String theInputDirPath = mTestFile.getParentFile().getAbsolutePath();
+        mTestInputDirectory = mTemporaryFolder.newFolder("input");
+        mTestFile = new File(mTestInputDirectory, "inputfile.txt");
+        FileUtils.writeStringToFile(mTestFile, TEST_FILE_CONTENTS);
 
-        final FileWriter theInputFileWriter = new FileWriter(mTestFile);
-        theInputFileWriter.write(TEST_FILE_CONTENTS);
-        theInputFileWriter.close();
+        LOGGER.info("Test input directory: {}", mTestInputDirectory.getAbsolutePath());
 
-        LOGGER.info("Test file directory: {}", mTestFile.getParentFile().getAbsolutePath());
-
-        return theInputDirPath;
-    }
-
-    /**
-     * Deletes the test file and its parent directory.<br/>
-     * If the test file does not exist, do nothing.
-     */
-    protected void deleteTestFile() {
-        if (mTestFile != null) {
-            try {
-                FileUtils.deleteDirectory(mTestFile.getParentFile());
-            } catch (final IOException theException) {
-                LOGGER.debug("Error deleting input file and directory");
-            }
-        }
+        return mTestInputDirectory.getAbsolutePath();
     }
 
     /**
@@ -195,7 +151,7 @@ public abstract class AbstractTestBaseClass {
 
         /* Verify name of moved file. */
         Assert
-            .assertEquals("Original file name should be preserved", mTestFile.getName(), theDestDirFiles[0].getName());
+        .assertEquals("Original file name should be preserved", mTestFile.getName(), theDestDirFiles[0].getName());
 
         /* Verify contents of moved file. */
         final String theMovedFileContents = FileUtils.readFileToString(theDestDirFiles[0]);

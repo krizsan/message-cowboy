@@ -45,7 +45,7 @@ import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
  * @author Ivan Krizsan
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { MuleTransportServiceTestConfiguration.class })
+@ContextConfiguration(classes = {MuleTransportServiceTestConfiguration.class})
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class MuleTransportServiceTest extends AbstractTestBaseClass {
     /* Constant(s): */
@@ -69,18 +69,12 @@ public class MuleTransportServiceTest extends AbstractTestBaseClass {
         createTestFileWithContent();
 
         /* Create endpoint URIs for the destination and source test directories. */
-        final String theInputDirPath =
-            mTestFile.getAbsolutePath().replaceAll("\\" + File.separator, "/");
+        final String theInputDirPath = mTestFile.getAbsolutePath().replaceAll("\\" + File.separator, "/");
         final String theDestDirPath =
-            mTestDestinationDirectory.getAbsolutePath().replaceAll(
-                "\\" + File.separator, "/");
+            mTestDestinationDirectory.getAbsolutePath().replaceAll("\\" + File.separator, "/");
 
-        mInboundFileEndpointUri =
-            "file://" + theInputDirPath
-            + "?connector=nonStreamingFileConnectorInbound";
-        mOutboundFileEndpointUri =
-            "file://" + theDestDirPath
-            + "?connector=nonStreamingFileConnectorOutbound";
+        mInboundFileEndpointUri = "file://" + theInputDirPath + "?connector=nonStreamingFileConnectorInbound";
+        mOutboundFileEndpointUri = "file://" + theDestDirPath + "?connector=nonStreamingFileConnectorOutbound";
     }
 
     /**
@@ -92,9 +86,6 @@ public class MuleTransportServiceTest extends AbstractTestBaseClass {
         if (mServiceUnderTest != null) {
             mServiceUnderTest.stop();
         }
-
-        deleteTestDestinationDirectory();
-        deleteTestFile();
     }
 
     /**
@@ -106,13 +97,10 @@ public class MuleTransportServiceTest extends AbstractTestBaseClass {
         mServiceUnderTest.start();
 
         final MuleMessage theMuleMessage =
-            new DefaultMuleMessage(TEST_MESSAGE_PAYLOAD,
-                mServiceUnderTest.getMuleContext());
+            new DefaultMuleMessage(TEST_MESSAGE_PAYLOAD, mServiceUnderTest.getMuleContext());
         /* Set name of file to be written to destination directory. */
-        theMuleMessage.setProperty("originalFilename", "testfile.txt",
-            PropertyScope.INBOUND);
-        final MoverMessage<MuleMessage> theMessage =
-            new MuleMoverMessage(theMuleMessage);
+        theMuleMessage.setProperty("originalFilename", "testfile.txt", PropertyScope.INBOUND);
+        final MoverMessage<MuleMessage> theMessage = new MuleMoverMessage(theMuleMessage);
 
         mServiceUnderTest.dispatch(theMessage, mOutboundFileEndpointUri);
 
@@ -120,9 +108,7 @@ public class MuleTransportServiceTest extends AbstractTestBaseClass {
 
         /* Verify outcome. */
         final File[] theDestDirFiles = mTestDestinationDirectory.listFiles();
-        Assert.assertEquals(
-            "There should be one file in the destination directory", 1,
-            theDestDirFiles.length);
+        Assert.assertEquals("There should be one file in the destination directory", 1, theDestDirFiles.length);
     }
 
     /**
@@ -133,18 +119,13 @@ public class MuleTransportServiceTest extends AbstractTestBaseClass {
         /* Start the Mule transport service. */
         mServiceUnderTest.start();
 
-        final MoverMessage<MuleMessage> theReceivedMessage =
-            mServiceUnderTest.receive(mInboundFileEndpointUri, 5000);
+        final MoverMessage<MuleMessage> theReceivedMessage = mServiceUnderTest.receive(mInboundFileEndpointUri, 5000);
 
         /* Verify outcome. */
-        Assert.assertNotNull("A message should have been received",
-            theReceivedMessage);
-        final MuleMessage theReceivedMuleMessage =
-            theReceivedMessage.getMessage();
-        Assert.assertNotNull("The received message should contain a payload",
-            theReceivedMessage.getMessage());
-        Assert.assertNotNull("The received message should contain a payload",
-            theReceivedMuleMessage.getPayload());
+        Assert.assertNotNull("A message should have been received", theReceivedMessage);
+        final MuleMessage theReceivedMuleMessage = theReceivedMessage.getMessage();
+        Assert.assertNotNull("The received message should contain a payload", theReceivedMessage.getMessage());
+        Assert.assertNotNull("The received message should contain a payload", theReceivedMuleMessage.getPayload());
     }
 
     /**
@@ -155,22 +136,16 @@ public class MuleTransportServiceTest extends AbstractTestBaseClass {
         /* Start the Mule transport service. */
         mServiceUnderTest.start();
 
-        try {
-            Thread.sleep(1500);
-        } catch (InterruptedException theException) {
-            /* Ignore exceptions. */
-        }
+        delay(1500L);
 
         performAndVerifyJmsTest();
     }
 
     private void performAndVerifyJmsTest() {
-        final String theJmsEndpointUri =
-            "jms://queue:muletransportservice.queue";
+        final String theJmsEndpointUri = "jms://queue:muletransportservice.queue";
 
         final MuleMessage theMuleMessage =
-            new DefaultMuleMessage(TEST_MESSAGE_PAYLOAD,
-                mServiceUnderTest.getMuleContext());
+            new DefaultMuleMessage(TEST_MESSAGE_PAYLOAD, mServiceUnderTest.getMuleContext());
         final MoverMessage<MuleMessage> theMessage = new MuleMoverMessage();
         theMessage.setMessage(theMuleMessage);
 
@@ -178,18 +153,14 @@ public class MuleTransportServiceTest extends AbstractTestBaseClass {
 
         delay(1000);
 
-        final MoverMessage<MuleMessage> theReceivedMessage =
-            mServiceUnderTest.receive(theJmsEndpointUri, 5000);
+        final MoverMessage<MuleMessage> theReceivedMessage = mServiceUnderTest.receive(theJmsEndpointUri, 5000);
 
         /* Verify outcome. */
-        Assert.assertNotNull("A message should have been received",
-            theReceivedMessage);
-        final MuleMessage theReceivedMuleMessage =
-            theReceivedMessage.getMessage();
-        Assert.assertNotNull("The received message should contain a payload",
-            theReceivedMessage.getMessage());
-        Assert.assertEquals("Payload of message should be unaltered",
-            TEST_MESSAGE_PAYLOAD, theReceivedMuleMessage.getPayload());
+        Assert.assertNotNull("A message should have been received", theReceivedMessage);
+        final MuleMessage theReceivedMuleMessage = theReceivedMessage.getMessage();
+        Assert.assertNotNull("The received message should contain a payload", theReceivedMessage.getMessage());
+        Assert.assertEquals("Payload of message should be unaltered", TEST_MESSAGE_PAYLOAD,
+            theReceivedMuleMessage.getPayload());
     }
 
     /**
@@ -214,16 +185,13 @@ public class MuleTransportServiceTest extends AbstractTestBaseClass {
         /* Set initial list of connector resources to file connector only. */
         final List<String> theLocationsList = new ArrayList<String>();
         theLocationsList.add("classpath:connectors/file-connectors.xml");
-        mServiceUnderTest
-        .setConnectorsResourcesLocationPattern(theLocationsList);
+        mServiceUnderTest.setConnectorsResourcesLocationPattern(theLocationsList);
 
         mServiceUnderTest.start();
 
         /* Add the JMS connector after the service has been started. */
-        theLocationsList
-        .add("classpath:connectors/jms-connector-with-embedded-amq.xml");
-        mServiceUnderTest
-        .setConnectorsResourcesLocationPattern(theLocationsList);
+        theLocationsList.add("classpath:connectors/jms-connector-with-embedded-amq.xml");
+        mServiceUnderTest.setConnectorsResourcesLocationPattern(theLocationsList);
 
         mServiceUnderTest.refreshConnectors();
 
