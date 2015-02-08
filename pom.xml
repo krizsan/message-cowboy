@@ -337,6 +337,24 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Generates code coverage report. -->
+            <plugin>
+			    <groupId>org.codehaus.mojo</groupId>
+			    <artifactId>cobertura-maven-plugin</artifactId>
+			    <version>2.6</version>
+			    <configuration>
+			        <format>xml</format>
+			        <maxmem>256m</maxmem>
+			    </configuration>
+			</plugin>
+			<!-- Submit code coverage report to Coveralls.io. -->
+            <plugin>
+				<groupId>org.eluder.coveralls</groupId>
+				<artifactId>coveralls-maven-plugin</artifactId>
+				<version>3.0.1</version>
+				<configuration>
+				</configuration>
+			</plugin>
         </plugins>
     </build>
 

@@ -1,6 +1,7 @@
 message-cowboy
 ==============
 [![Build Status](https://travis-ci.org/krizsan/message-cowboy.svg?branch=master)](https://travis-ci.org/krizsan/message-cowboy)
+[![Coverage Status](https://coveralls.io/repos/krizsan/message-cowboy/badge.svg?branch=master)](https://coveralls.io/r/krizsan/message-cowboy?branch=master)
 
 Round 'em messages up and bring them home!
 
