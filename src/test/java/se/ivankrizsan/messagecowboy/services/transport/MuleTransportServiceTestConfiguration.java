@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Scope;
 
 /**
  * Spring configuration class for the {@code MuleTransportServiceTest} test.
- * 
+ *
  * @author Ivan Krizsan
  */
 @Configuration
@@ -36,15 +36,14 @@ public class MuleTransportServiceTestConfiguration {
      * Transport service, Mule implementation.
      * In this test configuration, the transport service is not started
      * and stopped automatically.
-     * 
+     *
      * @return Service instance.
      */
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public TransportService transportService() {
         final MuleTransportService theService = new MuleTransportService();
-        theService
-            .setConnectorsResourcesLocationPattern(muleTransportServiceConfigLocations());
+        theService.setConnectorsResourcesLocationPattern(muleTransportServiceConfigLocations());
 
         return theService;
     }
@@ -54,7 +53,7 @@ public class MuleTransportServiceTestConfiguration {
      * Location of connector and transport service configuration files
      * for the Mule implementation of the transport service.<br/>
      * Test configuration.
-     * 
+     *
      * @return List of locations where the Mule transport service is to
      * search for configuration files.
      */
@@ -62,11 +61,9 @@ public class MuleTransportServiceTestConfiguration {
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public List<String> muleTransportServiceConfigLocations() {
         final List<String> theLocationsList = new ArrayList<String>();
-        theLocationsList.add("classpath:connectors/file-connectors.xml");
-        theLocationsList
-            .add("classpath:connectors/jms-connector-with-embedded-amq.xml");
-        theLocationsList
-            .add("classpath*:transport-service-configurations/*.xml");
+        theLocationsList.add("classpath:connectors/mule/file-connectors.xml");
+        theLocationsList.add("classpath:connectors/mule/jms-connector-with-embedded-amq.xml");
+        theLocationsList.add("classpath*:transport-service-configurations/*.xml");
 
         return theLocationsList;
     }

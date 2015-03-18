@@ -23,13 +23,12 @@ package se.ivankrizsan.messagecowboy.services.transport;
  *
  * @author Ivan Krizsan
  */
-class XmlConfigurationResourceInfo implements
-    Comparable<XmlConfigurationResourceInfo> {
+class XmlConfigurationResourceInfo implements Comparable<XmlConfigurationResourceInfo> {
     /* Constant(s): */
 
     /* Instance variable(s): */
-    protected String mResourceName;
-    protected String mResourceChecksum;
+    protected final String mResourceName;
+    protected final String mResourceChecksum;
 
     /**
      * Creates a resource info instance for configuration resource with supplied name
@@ -38,11 +37,9 @@ class XmlConfigurationResourceInfo implements
      * @param inResourceName Name of configuration resource.
      * @param inResourceChecksum Checksum of configuration resource.
      */
-    public XmlConfigurationResourceInfo(final String inResourceName,
-        final String inResourceChecksum) {
+    public XmlConfigurationResourceInfo(final String inResourceName, final String inResourceChecksum) {
         if (inResourceName == null || inResourceChecksum == null) {
-            throw new IllegalArgumentException(
-                "Name and checksum must not be null");
+            throw new IllegalArgumentException("Name and checksum must not be null");
         }
 
         mResourceName = inResourceName;
@@ -61,14 +58,8 @@ class XmlConfigurationResourceInfo implements
     public int hashCode() {
         final int thePrime = 31;
         int theResult = 1;
-        theResult =
-            thePrime
-                * theResult
-                + ((mResourceChecksum == null) ? 0 : mResourceChecksum
-                    .hashCode());
-        theResult =
-            thePrime * theResult
-                + ((mResourceName == null) ? 0 : mResourceName.hashCode());
+        theResult = thePrime * theResult + ((mResourceChecksum == null) ? 0 : mResourceChecksum.hashCode());
+        theResult = thePrime * theResult + ((mResourceName == null) ? 0 : mResourceName.hashCode());
         return theResult;
     }
 
@@ -83,14 +74,12 @@ class XmlConfigurationResourceInfo implements
         if (getClass() != inObjectToCompare.getClass()) {
             return false;
         }
-        XmlConfigurationResourceInfo theOtherConfigRsrscInfo =
-            (XmlConfigurationResourceInfo) inObjectToCompare;
+        XmlConfigurationResourceInfo theOtherConfigRsrscInfo = (XmlConfigurationResourceInfo) inObjectToCompare;
         if (mResourceChecksum == null) {
             if (theOtherConfigRsrscInfo.mResourceChecksum != null) {
                 return false;
             }
-        } else if (!mResourceChecksum
-            .equals(theOtherConfigRsrscInfo.mResourceChecksum)) {
+        } else if (!mResourceChecksum.equals(theOtherConfigRsrscInfo.mResourceChecksum)) {
             return false;
         }
         if (mResourceName == null) {
@@ -108,10 +97,8 @@ class XmlConfigurationResourceInfo implements
      * Only compares with regard to the name of the configuration resource.
      */
     @Override
-    public int compareTo(
-        final XmlConfigurationResourceInfo inOtherConfigRsrcInfo) {
-        final int theCompareResult =
-            mResourceName.compareTo(inOtherConfigRsrcInfo.getResourceName());
+    public int compareTo(final XmlConfigurationResourceInfo inOtherConfigRsrcInfo) {
+        final int theCompareResult = mResourceName.compareTo(inOtherConfigRsrcInfo.getResourceName());
         return theCompareResult;
     }
 }

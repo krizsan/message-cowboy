@@ -184,13 +184,13 @@ public class MuleTransportServiceTest extends AbstractTestBaseClass {
     public void testConnectorResourcesRefresh() throws IOException {
         /* Set initial list of connector resources to file connector only. */
         final List<String> theLocationsList = new ArrayList<String>();
-        theLocationsList.add("classpath:connectors/file-connectors.xml");
+        theLocationsList.add("classpath:connectors/mule/file-connectors.xml");
         mServiceUnderTest.setConnectorsResourcesLocationPattern(theLocationsList);
 
         mServiceUnderTest.start();
 
         /* Add the JMS connector after the service has been started. */
-        theLocationsList.add("classpath:connectors/jms-connector-with-embedded-amq.xml");
+        theLocationsList.add("classpath:connectors/mule/jms-connector-with-embedded-amq.xml");
         mServiceUnderTest.setConnectorsResourcesLocationPattern(theLocationsList);
 
         mServiceUnderTest.refreshConnectors();
