@@ -6,7 +6,7 @@ message-cowboy
 Round 'em messages up and bring them home!
 
 Message Cowboy is a configurable integration program which is able to schedule the fetching and delivery of messages from one endpoint to another endpoint.
-This version of Message Cowboy is using the Mule ESB 3.4.0 community edition to facilitate transports between different types of endpoints.
+This version of Message Cowboy is using the Mule ESB 3.6.1 community edition to facilitate transports between different types of endpoints.
 
 Configuration:
 
