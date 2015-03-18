@@ -58,7 +58,7 @@ public class TaskExecutionStatusCleanupTestConfiguration {
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public List<String> muleTransportServiceConfigLocations() {
         final List<String> theLocationsList = new ArrayList<String>();
-        theLocationsList.add("classpath:connectors/file-connectors.xml");
+        theLocationsList.add("classpath:connectors/mule/file-connectors.xml");
         return theLocationsList;
     }
 

@@ -31,11 +31,11 @@ import se.ivankrizsan.messagecowboy.testconfig.PersistenceTestConfiguration;
 /**
  * Spring configuration class for the {@code MuleSuccessfulOneTaskTest}
  * integration test.
- * 
+ *
  * @author Ivan Krizsan
  */
 @Configuration
-@Import({ MessageCowboyConfiguration.class, PersistenceTestConfiguration.class })
+@Import({MessageCowboyConfiguration.class, PersistenceTestConfiguration.class})
 public class MuleSuccessfulOneTaskTestConfiguration {
 
     /**
@@ -45,7 +45,7 @@ public class MuleSuccessfulOneTaskTestConfiguration {
      * Do not include the file containing JMS connector(s), since
      * the tests will use an embedded ActiveMQ broker with an associated
      * JMS connector defined in a special file.
-     * 
+     *
      * @return List of locations where the Mule transport service is to
      * search for configuration files.
      */
@@ -53,7 +53,7 @@ public class MuleSuccessfulOneTaskTestConfiguration {
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public List<String> muleTransportServiceConfigLocations() {
         final List<String> theLocationsList = new ArrayList<String>();
-        theLocationsList.add("classpath:connectors/file-connectors.xml");
+        theLocationsList.add("classpath:connectors/mule/file-connectors.xml");
         return theLocationsList;
     }
 }

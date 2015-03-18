@@ -186,7 +186,7 @@ public class CamelTransportServiceTest extends AbstractTestBaseClass {
     public void testConnectorResourcesRefresh() throws IOException {
         /* Set initial list of connector resources to file connector only. */
         final List<String> theLocationsList = new ArrayList<String>();
-        theLocationsList.add("classpath:connectors/file-connectors.xml");
+        theLocationsList.add("classpath:connectors/camel/file-connectors.xml");
         mServiceUnderTest.setConnectorsResourcesLocationPattern(theLocationsList);
 
         mServiceUnderTest.start();
