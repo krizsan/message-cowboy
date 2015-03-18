@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d %-5p %-30C - %m%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.mule" level="info"/>
+        <Logger name="org.mule.transport" level="warn"/>
+        <Logger name="org.springframework" level="info"/>
+        <Logger name="org.apache.activemq" level="info"/>
+        <Logger name="org.apache.camel" level="info"/>
+        <Logger name="se.ivankrizsan.messagecowboy" level="info"/>
+        <Logger name="org.mule" level="info"/>
+        <Logger name="org.mule" level="info"/>
+        <Logger name="org.mule" level="info"/>
+        <Root level="warn">
+            <AppenderRef ref="STDOUT"/>
+        </Root>
+    </Loggers>
+</Configuration>

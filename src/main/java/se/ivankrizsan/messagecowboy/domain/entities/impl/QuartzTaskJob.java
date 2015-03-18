@@ -41,13 +41,11 @@ import se.ivankrizsan.messagecowboy.services.transport.TransportService;
 public class QuartzTaskJob implements Job, TaskJob {
     /* Constant(s): */
     /** Class logger. */
-    private static final Logger LOGGER = LoggerFactory
-        .getLogger(QuartzTaskJob.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(QuartzTaskJob.class);
     /** Key used to locate task configuration in Quartz job data map. */
     public static final String TASK_CONFIGURATION_JOB_DATA_KEY = "qMoverTask";
     /** Key used to locate transport service in Quartz job data map. */
-    public static final String TRANSPORT_SERVICE_JOB_DATA_KEY =
-        "qTransportService";
+    public static final String TRANSPORT_SERVICE_JOB_DATA_KEY = "qTransportService";
     /** Key used to locate task configuration service in Quartz job data map. */
     public static final String TASK_CONFIGURATION_SERVICE_JOB_DATA_KEY =
         "qTaskConfigurationService";
@@ -57,13 +55,10 @@ public class QuartzTaskJob implements Job, TaskJob {
     @Override
     public void execute(final JobExecutionContext inJobExecutionContext)
         throws JobExecutionException {
-        final String theJobName =
-            inJobExecutionContext.getJobDetail().getKey().getName();
-        final String theJobGroup =
-            inJobExecutionContext.getJobDetail().getKey().getGroup();
+        final String theJobName = inJobExecutionContext.getJobDetail().getKey().getName();
+        final String theJobGroup = inJobExecutionContext.getJobDetail().getKey().getGroup();
 
-        LOGGER.debug("Started executing job {} in group {}", theJobName,
-            theJobGroup);
+        LOGGER.debug("Started executing job {} in group {}", theJobName, theJobGroup);
 
         /* Proceed only if there is a mover task in the job data map. */
         final MessageCowboySchedulableTaskConfig theMoverTaskConfig =
@@ -79,15 +74,13 @@ public class QuartzTaskJob implements Job, TaskJob {
                 theTaskConfigurationService);
         } else {
             if (theMoverTaskConfig == null) {
-                LOGGER
-                .error("Job data map did not contain mover task configuration");
+                LOGGER.error("Job data map did not contain mover task configuration");
             }
             if (theTransportService == null) {
                 LOGGER.error("Job data map did not contain transport service");
             }
             if (theTaskConfigurationService == null) {
-                LOGGER
-                .error("Job data map did not contain task configuration service");
+                LOGGER.error("Job data map did not contain task configuration service");
             }
         }
     }
@@ -104,8 +97,8 @@ public class QuartzTaskJob implements Job, TaskJob {
         final JobExecutionContext inJobExecutionContext) {
         TransportService theTransportService = null;
         final Object theObject =
-            inJobExecutionContext.getJobDetail().getJobDataMap().get(
-                TRANSPORT_SERVICE_JOB_DATA_KEY);
+            inJobExecutionContext.getJobDetail().getJobDataMap()
+                .get(TRANSPORT_SERVICE_JOB_DATA_KEY);
         if (theObject != null && theObject instanceof TransportService) {
             theTransportService = (TransportService) theObject;
         }
@@ -163,11 +156,9 @@ public class QuartzTaskJob implements Job, TaskJob {
      * to update task status after task execution.
      * @throws JobExecutionException If error occurs executing job.
      */
-    protected void executeMoverTaskJob(
-        final MessageCowboySchedulableTaskConfig inMoverTask,
+    protected void executeMoverTaskJob(final MessageCowboySchedulableTaskConfig inMoverTask,
         final TransportService inTransportService,
-        final TaskConfigurationService inTaskConfigurationService)
-            throws JobExecutionException {
+        final TaskConfigurationService inTaskConfigurationService) throws JobExecutionException {
         @SuppressWarnings("rawtypes")
         MoverMessage theInboundMessage;
         JobExecutionException theJobExecutionException = null;
@@ -176,18 +167,15 @@ public class QuartzTaskJob implements Job, TaskJob {
         LOGGER.debug("Executing mover task job {}", inMoverTask.getName());
 
         try {
-            theInboundMessage =
-                requestInboundMessage(inTransportService, inMoverTask);
+            theInboundMessage = requestInboundMessage(inTransportService, inMoverTask);
 
-            LOGGER.debug("Message received from {}: {}", inMoverTask
-                .getInboundEndpointURI(), theInboundMessage);
+            LOGGER.debug("Message received from {}: {}", inMoverTask.getInboundEndpointURI(),
+                theInboundMessage);
 
             if (theInboundMessage != null) {
                 /* Received a message. Now try to dispatch it. */
-                LOGGER.debug("Dispatching message to {}", inMoverTask
-                    .getOutboundEndpointURI());
-                dispatchOutboundMessage(inTransportService, inMoverTask,
-                    theInboundMessage);
+                LOGGER.debug("Dispatching message to {}", inMoverTask.getOutboundEndpointURI());
+                dispatchOutboundMessage(inTransportService, inMoverTask, theInboundMessage);
 
                 addTaskExecutionSuccessToTask(inMoverTask, theTaskStartTime);
             } else {
@@ -219,8 +207,7 @@ public class QuartzTaskJob implements Job, TaskJob {
     protected void addTaskExecutionNoMessageReceivedToTask(
         final MessageCowboySchedulableTaskConfig inMoverTask) {
         final TaskExecutionStatus theTaskStatus =
-            new TaskExecutionStatusNoMessageReceived(inMoverTask, "",
-                new Date());
+            new TaskExecutionStatusNoMessageReceived(inMoverTask, "", new Date());
         inMoverTask.addTaskExecutionStatus(theTaskStatus);
     }
 
@@ -241,8 +228,7 @@ public class QuartzTaskJob implements Job, TaskJob {
         }
 
         final TaskExecutionStatus theTaskStatus =
-            new TaskExecutionStatusError(inMoverTask, theTaskStatusMsg,
-                new Date());
+            new TaskExecutionStatusError(inMoverTask, theTaskStatusMsg, new Date());
         inMoverTask.addTaskExecutionStatus(theTaskStatus);
     }
 
@@ -254,16 +240,13 @@ public class QuartzTaskJob implements Job, TaskJob {
      * @param inTaskStartTime Task execution start time in milliseconds.
      */
     protected void addTaskExecutionSuccessToTask(
-        final MessageCowboySchedulableTaskConfig inMoverTask,
-        final long inTaskStartTime) {
+        final MessageCowboySchedulableTaskConfig inMoverTask, final long inTaskStartTime) {
         final long theTaskEndTime = System.currentTimeMillis();
         final long theTaskExecutionTime = theTaskEndTime - inTaskStartTime;
-        final String theTaskStatusMsg =
-            "Executed in " + theTaskExecutionTime + " milliseconds";
+        final String theTaskStatusMsg = "Executed in " + theTaskExecutionTime + " milliseconds";
 
         final TaskExecutionStatus theTaskStatus =
-            new TaskExecutionStatusSuccess(inMoverTask, theTaskStatusMsg,
-                new Date());
+            new TaskExecutionStatusSuccess(inMoverTask, theTaskStatusMsg, new Date());
         inMoverTask.addTaskExecutionStatus(theTaskStatus);
     }
 
@@ -276,18 +259,16 @@ public class QuartzTaskJob implements Job, TaskJob {
      * @param inOutboundMessage Message to dispatch.
      * @throws JobExecutionException If error occurs dispatching message.
      */
-    protected void dispatchOutboundMessage(
-        final TransportService inTransportService,
+    protected void dispatchOutboundMessage(final TransportService inTransportService,
         final MessageCowboySchedulableTaskConfig inMoverTask,
         @SuppressWarnings("rawtypes") final MoverMessage inOutboundMessage)
-            throws JobExecutionException {
+        throws JobExecutionException {
         try {
-            inTransportService.dispatch(inOutboundMessage, inMoverTask
-                .getOutboundEndpointURI());
+            inTransportService.dispatch(inOutboundMessage, inMoverTask.getOutboundEndpointURI());
         } catch (final Throwable theException) {
             LOGGER.error("An error occurred when the task {} in group {} "
-                + "dispatched an outbound message", inMoverTask.getName(),
-                inMoverTask.getTaskGroupName());
+                + "dispatched an outbound message", inMoverTask.getName(), inMoverTask
+                .getTaskGroupName());
 
             throw new JobExecutionException(theException);
         }
@@ -305,19 +286,17 @@ public class QuartzTaskJob implements Job, TaskJob {
      * @throws JobExecutionException If error occurs receiving message.
      */
     @SuppressWarnings("rawtypes")
-    protected MoverMessage requestInboundMessage(
-        final TransportService inTransportService,
-        final MessageCowboySchedulableTaskConfig inMoverTask)
-            throws JobExecutionException {
+    protected MoverMessage requestInboundMessage(final TransportService inTransportService,
+        final MessageCowboySchedulableTaskConfig inMoverTask) throws JobExecutionException {
         MoverMessage theInboundMessage;
         try {
             theInboundMessage =
-                inTransportService.receive(inMoverTask.getInboundEndpointURI(),
-                    inMoverTask.getInboundTimeout());
+                inTransportService.receive(inMoverTask.getInboundEndpointURI(), inMoverTask
+                    .getInboundTimeout());
         } catch (final Throwable theException) {
             LOGGER.error("An error occurred when the task {} in group {} "
-                + "requested an inbound message", inMoverTask.getName(),
-                inMoverTask.getTaskGroupName());
+                + "requested an inbound message", inMoverTask.getName(), inMoverTask
+                .getTaskGroupName());
 
             throw new JobExecutionException(theException);
         }
