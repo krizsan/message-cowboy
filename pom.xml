@@ -32,7 +32,7 @@
             Version of Spring Data JPA that has depends on a version of 
             the Spring framework that is not newer than the one used here.
         -->
-        <spring.data.jpa.version>1.4.5.RELEASE</spring.data.jpa.version>
+        <spring.data.jpa.version>1.5.1.RELEASE</spring.data.jpa.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
