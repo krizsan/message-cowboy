@@ -37,7 +37,8 @@ class XmlConfigurationResourceInfo implements Comparable<XmlConfigurationResourc
      * @param inResourceName Name of configuration resource.
      * @param inResourceChecksum Checksum of configuration resource.
      */
-    public XmlConfigurationResourceInfo(final String inResourceName, final String inResourceChecksum) {
+    public XmlConfigurationResourceInfo(final String inResourceName,
+        final String inResourceChecksum) {
         if (inResourceName == null || inResourceChecksum == null) {
             throw new IllegalArgumentException("Name and checksum must not be null");
         }

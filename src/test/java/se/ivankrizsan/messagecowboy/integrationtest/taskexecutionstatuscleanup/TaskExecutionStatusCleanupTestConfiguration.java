@@ -16,26 +16,22 @@
  */
 package se.ivankrizsan.messagecowboy.integrationtest.taskexecutionstatuscleanup;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
 import org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.PropertyOverrideConfigurer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
-
+import org.springframework.context.annotation.*;
 import se.ivankrizsan.messagecowboy.MessageCowboyConfiguration;
 import se.ivankrizsan.messagecowboy.testconfig.PersistenceTestConfiguration;
 import se.ivankrizsan.messagecowboy.testutils.InvocationLoggerMethodInterceptor;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
 /**
- * Spring configuration class for the {@code TaskExecutionStatusCleanupTest} integration test.
+ * Spring configuration class for the {@code TaskExecutionStatusCleanupTest}
+ * integration test.
  *
  * @author Ivan Krizsan
  */
@@ -57,7 +53,7 @@ public class TaskExecutionStatusCleanupTestConfiguration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public List<String> muleTransportServiceConfigLocations() {
-        final List<String> theLocationsList = new ArrayList<String>();
+        final List<String> theLocationsList = new ArrayList<>();
         theLocationsList.add("classpath:connectors/mule/file-connectors.xml");
         return theLocationsList;
     }

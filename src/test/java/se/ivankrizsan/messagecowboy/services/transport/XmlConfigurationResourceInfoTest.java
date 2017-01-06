@@ -19,12 +19,14 @@ package se.ivankrizsan.messagecowboy.services.transport;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import ru.yandex.qatools.allure.annotations.Features;
 
 /**
  * Tests the {@code XmlConfigurationResourceInfo} class.
  *
  * @author Ivan Krizsan
  */
+@Features("XML Configuration Metadata")
 public class XmlConfigurationResourceInfoTest {
     /* Constant(s): */
     protected static final String RESOURCE_CHECKSUM_1 = "123456";

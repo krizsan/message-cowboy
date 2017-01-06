@@ -16,9 +16,6 @@
  */
 package se.ivankrizsan.messagecowboy.integrationtest.camel;
 
-import java.io.File;
-import java.util.Date;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -32,11 +29,15 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.services.starter.MessageCowboyStarterService;
 import se.ivankrizsan.messagecowboy.services.taskconfiguration.TaskConfigurationService;
 import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
+
+import java.io.File;
+import java.util.Date;
 
 /**
  * Integration test testing startup, scheduling and execution of one task which
@@ -45,6 +46,7 @@ import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
  * @author Petter Nordlander
  * @author Ivan Krizsan
  */
+@Features("Camel")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {CamelTestTaskConfigRefreshConfiguration.class})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
@@ -121,6 +123,7 @@ public class CamelTaskConfigRefreshTest extends AbstractTestBaseClass {
      * @throws Exception If error occurs during test. Indicates test failure.
      */
     @Test
+    @Description("Tests modification of a scheduled task that uses Camel")
     public void testModifyTaskConfigurationBeforeFileMove() throws Exception {
         /* Modify the task configuration before task is executed. */
         final MessageCowboySchedulableTaskConfig theTaskConfigToModify =

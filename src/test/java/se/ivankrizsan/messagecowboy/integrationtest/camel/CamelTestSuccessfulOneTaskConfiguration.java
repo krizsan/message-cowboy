@@ -16,22 +16,21 @@
  */
 package se.ivankrizsan.messagecowboy.integrationtest.camel;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Scope;
-
 import se.ivankrizsan.messagecowboy.MessageCowboyConfiguration;
 import se.ivankrizsan.messagecowboy.testconfig.PersistenceTestConfiguration;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Spring configuration class for the {@code CamelSuccessfulOneTaskTest}
  * integration test.
- * 
+ *
  * @author Petter Nordlander
  */
 @Configuration
@@ -45,14 +44,14 @@ public class CamelTestSuccessfulOneTaskConfiguration {
      * Do not include the file containing JMS connector(s), since
      * the tests will use an embedded ActiveMQ broker with an associated
      * JMS connector defined in a special file.
-     * 
+     *
      * @return List of locations where the Camel transport service is to
      * search for configuration files.
      */
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public List<String> camelTransportServiceConfigLocations() {
-        final List<String> theLocationsList = new ArrayList<String>();
+        final List<String> theLocationsList = new ArrayList<>();
         theLocationsList.add("classpath:connectors/camel/file-connectors.xml");
         return theLocationsList;
     }

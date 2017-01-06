@@ -31,6 +31,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import ru.yandex.qatools.allure.annotations.Features;
 import se.ivankrizsan.messagecowboy.domain.entities.MoverMessage;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.CamelMoverMessage;
 import se.ivankrizsan.messagecowboy.testconfig.JmsBrokerTestConfiguration;
@@ -47,6 +48,7 @@ import java.util.List;
  * @author Petter Nordlander
  * @author Ivan Krizsan
  */
+@Features("Camel")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {JmsBrokerTestConfiguration.class,
     CamelTransportServiceTestConfiguration.class})

@@ -16,8 +16,6 @@
  */
 package se.ivankrizsan.messagecowboy.integrationtest.taskexecutionstatuscleanup;
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +24,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
+import ru.yandex.qatools.allure.annotations.Features;
 import se.ivankrizsan.messagecowboy.services.starter.MessageCowboyStarterService;
 import se.ivankrizsan.messagecowboy.services.taskconfiguration.TaskConfigurationService;
 import se.ivankrizsan.messagecowboy.services.taskexecutionstatus.TaskExecutionStatusService;
@@ -34,13 +32,16 @@ import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
 import se.ivankrizsan.messagecowboy.testutils.InvocationLoggerMethodInterceptor;
 import se.ivankrizsan.messagecowboy.testutils.InvocationLoggerMethodInterceptor.InvocationLogEntry;
 
+import java.util.List;
+
 /**
  * Tests task execution status cleanup scheduling.
- * This tests originates from having observed strange behaviour of te scheduling of the
- * scheduled job in question.
+ * This tests originates from having observed strange behaviour of the
+ * scheduling of the scheduled job in question.
  *
  * @author Ivan Krizsan
  */
+@Features("Task Execution Status")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TaskExecutionStatusCleanupTestConfiguration.class})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)

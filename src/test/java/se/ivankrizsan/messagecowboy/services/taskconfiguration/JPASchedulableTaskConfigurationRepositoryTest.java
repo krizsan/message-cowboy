@@ -16,11 +16,6 @@
  */
 package se.ivankrizsan.messagecowboy.services.taskconfiguration;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,15 +29,23 @@ import org.springframework.test.context.junit4.AbstractTransactionalJUnit4Spring
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.qatools.allure.annotations.Features;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.testconfig.PersistenceTestConfiguration;
 import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
+
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Tests the {@link JPASchedulableTaskConfigurationRepository}.
  *
  * @author Ivan Krizsan
  */
+@Features("Persistence")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { PersistenceTestConfiguration.class,
     TaskConfigurationServiceConfiguration.class })

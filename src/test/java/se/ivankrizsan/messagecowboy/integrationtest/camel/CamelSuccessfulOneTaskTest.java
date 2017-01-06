@@ -26,7 +26,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
+import ru.yandex.qatools.allure.annotations.Description;
+import ru.yandex.qatools.allure.annotations.Features;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.services.starter.MessageCowboyStarterService;
 import se.ivankrizsan.messagecowboy.services.taskconfiguration.TaskConfigurationService;
@@ -39,6 +40,7 @@ import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
  * @author Ivan Krizsan
  * @author Petter Nordlander
  */
+@Features("Camel")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {CamelTestSuccessfulOneTaskConfiguration.class})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
@@ -106,6 +108,7 @@ public class CamelSuccessfulOneTaskTest extends AbstractTestBaseClass {
      * @throws Exception If error occurs during test. Indicates test failure.
      */
     @Test
+    @Description("Tests scheduled moving of a file using Camel")
     public void testSuccessfulFileMove() throws Exception {
         /* Just need to wait for the task to execute as scheduled. */
         delay(3000L);

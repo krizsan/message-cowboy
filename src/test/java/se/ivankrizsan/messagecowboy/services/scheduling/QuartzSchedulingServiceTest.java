@@ -16,11 +16,6 @@
  */
 package se.ivankrizsan.messagecowboy.services.scheduling;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -31,18 +26,24 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
+import ru.yandex.qatools.allure.annotations.Features;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.domain.valueobjects.TaskKey;
 import se.ivankrizsan.messagecowboy.services.scheduling.exceptions.SchedulingException;
 import se.ivankrizsan.messagecowboy.services.scheduling.helpers.JPATestMoverTask;
 import se.ivankrizsan.messagecowboy.services.scheduling.helpers.QuartzTestTaskJob;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Tests the {@code QuartzSchedulingService} class.
  *
  * @author Ivan Krizsan
  */
+@Features("Scheduling")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {SchedulingServiceConfiguration.class})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
@@ -67,7 +68,7 @@ public class QuartzSchedulingServiceTest {
         mTestTask.setTaskGroupName(TASK_GROUP_NAME);
         mTestTask.setTaskEnabledFlag(true);
 
-        mJobDataMap = new HashMap<String, Object>();
+        mJobDataMap = new HashMap<>();
         /*
          * Insert reference to map that is to receive invocation count and invocation times.
          * This map is reused, since Quartz will only copy the contents when creating a job.
@@ -101,7 +102,7 @@ public class QuartzSchedulingServiceTest {
 
     /**
      * Tests scheduling a task with a bad CRON expression.
-     * 
+     *
      *
      * @throws Exception Expected result.
      */
@@ -221,7 +222,7 @@ public class QuartzSchedulingServiceTest {
         Thread.sleep(100);
 
         /* Create list of tasks not to unschedule. */
-        List<TaskKey> theTaskList = new ArrayList<TaskKey>();
+        List<TaskKey> theTaskList = new ArrayList<>();
         final TaskKey theTaskKey = new TaskKey(TASK_GROUP_NAME, TASK_NAME);
         theTaskList.add(theTaskKey);
 

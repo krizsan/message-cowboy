@@ -16,7 +16,6 @@
  */
 package se.ivankrizsan.messagecowboy.services.taskconfiguration;
 
-import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,9 +25,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import ru.yandex.qatools.allure.annotations.Features;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.testconfig.PersistenceTestConfiguration;
 import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
+
+import java.util.List;
 
 /**
  * Implements test of the {@code TaskConfigurationServiceImpl} class.
@@ -38,6 +40,7 @@ import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
  *
  * @author Ivan Krizsan
  */
+@Features("Task Configuration")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { PersistenceTestConfiguration.class,
     TaskConfigurationServiceConfiguration.class })

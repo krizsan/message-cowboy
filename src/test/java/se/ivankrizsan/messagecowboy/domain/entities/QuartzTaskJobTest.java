@@ -16,19 +16,15 @@
  */
 package se.ivankrizsan.messagecowboy.domain.entities;
 
-import java.util.Date;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.AdditionalAnswers;
 import org.mockito.Mockito;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.JobKey;
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.yandex.qatools.allure.annotations.Features;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MessageCowboySchedulableTaskConfig;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MuleMoverMessage;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.QuartzTaskJob;
@@ -41,11 +37,14 @@ import se.ivankrizsan.messagecowboy.services.transport.TransportService;
 import se.ivankrizsan.messagecowboy.services.transport.exceptions.TransportException;
 import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
 
+import java.util.Date;
+
 /**
  * Tests the {@link QuartzTaskJob} class.
  *
  * @author Ivan Krizsan
  */
+@Features("Task Execution")
 public class QuartzTaskJobTest extends AbstractTestBaseClass {
     /* Constant(s): */
     static final Logger LOGGER = LoggerFactory
