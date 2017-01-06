@@ -16,13 +16,13 @@
  */
 package se.ivankrizsan.messagecowboy.services.transport;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Spring configuration class for the {@code MuleTransportServiceTest} test.
@@ -60,9 +60,9 @@ public class MuleTransportServiceTestConfiguration {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public List<String> muleTransportServiceConfigLocations() {
-        final List<String> theLocationsList = new ArrayList<String>();
+        final List<String> theLocationsList = new ArrayList<>();
         theLocationsList.add("classpath:connectors/mule/file-connectors.xml");
-        theLocationsList.add("classpath:connectors/mule/jms-connector-with-embedded-amq.xml");
+        theLocationsList.add("classpath:connectors/mule/jms-connector.xml");
         theLocationsList.add("classpath*:transport-service-configurations/*.xml");
 
         return theLocationsList;

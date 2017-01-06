@@ -16,11 +16,6 @@
  */
 package se.ivankrizsan.messagecowboy.services.transport;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultExchange;
@@ -36,10 +31,15 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import se.ivankrizsan.messagecowboy.domain.entities.MoverMessage;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.CamelMoverMessage;
+import se.ivankrizsan.messagecowboy.testconfig.JmsBrokerTestConfiguration;
 import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Test {@link CamelTransportService}.
@@ -48,13 +48,15 @@ import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
  * @author Ivan Krizsan
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {CamelTransportServiceTestConfiguration.class})
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@ContextConfiguration(classes = {JmsBrokerTestConfiguration.class,
+    CamelTransportServiceTestConfiguration.class})
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class CamelTransportServiceTest extends AbstractTestBaseClass {
-
+    /* Constant(s): */
     private static final Logger LOGGER = LoggerFactory.getLogger(CamelTransportServiceTest.class);
     private static final String TEST_MESSAGE_PAYLOAD = "some payload åäöÅÄÖ";
 
+    /* Instance variable(s): */
     @Autowired
     private CamelTransportService mServiceUnderTest;
     private String mInboundFileEndpointUri;
@@ -123,7 +125,6 @@ public class CamelTransportServiceTest extends AbstractTestBaseClass {
         /* Start the Camel transport service. */
         mServiceUnderTest.start();
         LOGGER.info("Trying to receive a file from {}", mInboundFileEndpointUri);
-        @SuppressWarnings("unchecked")
         final MoverMessage<Exchange> theReceivedMessage = mServiceUnderTest.receive(mInboundFileEndpointUri, 5000);
 
         /* Verify outcome. */
@@ -156,7 +157,6 @@ public class CamelTransportServiceTest extends AbstractTestBaseClass {
 
         delay(1000);
 
-        @SuppressWarnings("unchecked")
         final MoverMessage<Exchange> theReceivedMessage = mServiceUnderTest.receive(theJmsEndpointUri, 5000);
 
         /* Verify outcome. */
@@ -185,14 +185,14 @@ public class CamelTransportServiceTest extends AbstractTestBaseClass {
     @Test
     public void testConnectorResourcesRefresh() throws IOException {
         /* Set initial list of connector resources to file connector only. */
-        final List<String> theLocationsList = new ArrayList<String>();
+        final List<String> theLocationsList = new ArrayList<>();
         theLocationsList.add("classpath:connectors/camel/file-connectors.xml");
         mServiceUnderTest.setConnectorsResourcesLocationPattern(theLocationsList);
 
         mServiceUnderTest.start();
 
         /* Add the JMS connector after the service has been started. */
-        theLocationsList.add("classpath:connectors/camel/jms-connector-with-embedded-amq.xml");
+        theLocationsList.add("classpath:connectors/camel/jms-connector.xml");
         mServiceUnderTest.setConnectorsResourcesLocationPattern(theLocationsList);
 
         mServiceUnderTest.refreshConnectors();

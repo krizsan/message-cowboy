@@ -16,11 +16,6 @@
  */
 package se.ivankrizsan.messagecowboy.services.transport;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,10 +29,15 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import se.ivankrizsan.messagecowboy.domain.entities.MoverMessage;
 import se.ivankrizsan.messagecowboy.domain.entities.impl.MuleMoverMessage;
+import se.ivankrizsan.messagecowboy.testconfig.JmsBrokerTestConfiguration;
 import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tests the {@code MuleTransportService} service.
@@ -45,8 +45,9 @@ import se.ivankrizsan.messagecowboy.testutils.AbstractTestBaseClass;
  * @author Ivan Krizsan
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {MuleTransportServiceTestConfiguration.class})
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@ContextConfiguration(classes = {JmsBrokerTestConfiguration.class,
+    MuleTransportServiceTestConfiguration.class})
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class MuleTransportServiceTest extends AbstractTestBaseClass {
     /* Constant(s): */
     private static final String TEST_MESSAGE_PAYLOAD = "some payload åäöÅÄÖ";
@@ -183,14 +184,14 @@ public class MuleTransportServiceTest extends AbstractTestBaseClass {
     @Test
     public void testConnectorResourcesRefresh() throws IOException {
         /* Set initial list of connector resources to file connector only. */
-        final List<String> theLocationsList = new ArrayList<String>();
+        final List<String> theLocationsList = new ArrayList<>();
         theLocationsList.add("classpath:connectors/mule/file-connectors.xml");
         mServiceUnderTest.setConnectorsResourcesLocationPattern(theLocationsList);
 
         mServiceUnderTest.start();
 
         /* Add the JMS connector after the service has been started. */
-        theLocationsList.add("classpath:connectors/mule/jms-connector-with-embedded-amq.xml");
+        theLocationsList.add("classpath:connectors/mule/jms-connector.xml");
         mServiceUnderTest.setConnectorsResourcesLocationPattern(theLocationsList);
 
         mServiceUnderTest.refreshConnectors();

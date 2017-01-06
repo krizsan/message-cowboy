@@ -16,18 +16,18 @@
  */
 package se.ivankrizsan.messagecowboy.services.transport;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Spring config for {@link CamelTransportServiceTest}.
- * @author Petter Nordlander
  *
+ * @author Petter Nordlander
  */
 @Configuration
 public class CamelTransportServiceTestConfiguration {
@@ -36,7 +36,7 @@ public class CamelTransportServiceTestConfiguration {
      * Transport service, Camel implementation.
      * In this test configuration, the transport service is not started
      * and stopped automatically.
-     * 
+     *
      * @return Service instance.
      */
     @Bean
@@ -54,16 +54,16 @@ public class CamelTransportServiceTestConfiguration {
      * Location of connector and transport service configuration files
      * for the Camel implementation of the transport service.<br/>
      * Test configuration.
-     * 
+     *
      * @return List of locations where the Camel transport service is to
      * search for configuration files.
      */
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public List<String> camelTransportServiceConfigLocations() {
-        final List<String> theLocationsList = new ArrayList<String>();
+        final List<String> theLocationsList = new ArrayList<>();
         theLocationsList
-            .add("classpath:connectors/camel/jms-connector-with-embedded-amq.xml");
+            .add("classpath:connectors/camel/jms-connector.xml");
 
         return theLocationsList;
     }
