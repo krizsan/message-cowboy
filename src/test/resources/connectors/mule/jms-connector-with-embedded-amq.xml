@@ -6,28 +6,25 @@
     you can redistribute it and/or modify it under the terms of the GNU General
     Public License as published by the Free Software Foundation, either version 3
     of the License, or (at your option) any later version.
- 
+
     This program is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
     FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
     details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/>.
 -->
 <mule
-    xmlns="http://www.mulesoft.org/schema/mule/core"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:spring="http://www.springframework.org/schema/beans"
-    xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
-    xmlns:amq="http://activemq.apache.org/schema/core"
-    xmlns:test="http://www.mulesoft.org/schema/mule/test"
-    xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+        xmlns="http://www.mulesoft.org/schema/mule/core"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:spring="http://www.springframework.org/schema/beans"
+        xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+        xmlns:amq="http://activemq.apache.org/schema/core"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
-http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd
-http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/test/current/mule-test.xsd">
+http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
 
     <spring:beans>
         <!--
@@ -36,13 +33,13 @@ http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/tes
         <amq:broker id="amq-broker"
             useJmx="false"
             persistent="false"
-            restartAllowed="false"
+            restartAllowed="true"
             useShutdownHook="true"
             startAsync="true">
             <amq:destinationPolicy>
                 <amq:policyMap>
                     <amq:policyEntries>
-                        <amq:policyEntry queue=">" producerFlowControl="true" memoryLimit="1mb">
+                        <amq:policyEntry queue=">" producerFlowControl="true" memoryLimit="10mb">
                             <amq:deadLetterStrategy>
                                 <amq:individualDeadLetterStrategy
                                     queuePrefix="DLQ." useQueueForQueueMessages="true" />
@@ -52,10 +49,10 @@ http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/tes
                 </amq:policyMap>
             </amq:destinationPolicy>
             <amq:transportConnectors>
-                <amq:transportConnector uri="vm://localhost"/>
+                <amq:transportConnector uri="vm://0.0.0.0"/>
             </amq:transportConnectors>
         </amq:broker>
-    
+
         <spring:bean name="amqRedeliveryPolicy" class="org.apache.activemq.RedeliveryPolicy">
             <spring:property name="maximumRedeliveries" value="-1"/>
             <spring:property name="initialRedeliveryDelay" value="500"/>
@@ -63,7 +60,7 @@ http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/tes
             <spring:property name="backOffMultiplier" value="5"/>
             <spring:property name="maximumRedeliveryDelay" value="-1"/>
         </spring:bean>
-        
+
         <!--
             If the create=false parameter is not included in the broker URL,
             then Mule will start an embedded ActiveMQ broker and this is not
