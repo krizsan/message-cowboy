@@ -11,3 +11,5 @@
 /activemq-data/
 /.externalToolBuilders/
 /.mule/
+/.idea/
+/message-cowboy.iml

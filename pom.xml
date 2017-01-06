@@ -24,15 +24,12 @@
     <version>1.0.0-SNAPSHOT</version>
 
     <properties>
-        <junit.version>4.11</junit.version>
-        <mule.version>3.6.1</mule.version>
-        <!-- Use the same Spring version as Mule uses. -->
-        <spring.version>3.2.10.RELEASE</spring.version>
+        <mule.version>3.8.1</mule.version>
         <!--
-            Version of Spring Data JPA that has depends on a version of 
-            the Spring framework that is not newer than the one used here.
+            Ensure that the version of Spring framework in the Spring platform
+            BOM matches the version of Spring framework used in Mule ESB.
         -->
-        <spring.data.jpa.version>1.5.1.RELEASE</spring.data.jpa.version>
+        <spring.platform.bom.version>1.1.2.RELEASE</spring.platform.bom.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -40,8 +37,8 @@
         <eclipsePluginVersion>2.8</eclipsePluginVersion>
         <!-- Aligned with ActiveMQ version since activemq-all ships with activemq-camel component -->
         <camel.version>2.12.1</camel.version>
-        <jdkName>JavaSE-1.7</jdkName>
-        <jdk.version>1.7</jdk.version>
+        <jdkName>JavaSE-1.8</jdkName>
+        <jdk.version>1.8</jdk.version>
         <activemq.version>5.9.0</activemq.version>
     </properties>
 
@@ -149,29 +146,24 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
-            <version>${spring.data.jpa.version}</version>
         </dependency>
-  
+
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
@@ -218,13 +210,11 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mule.tests</groupId>
@@ -259,6 +249,18 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.spring.platform</groupId>
+                <artifactId>platform-bom</artifactId>
+                <version>${spring.platform.bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
@@ -310,7 +312,7 @@
                 </configuration>
             </plugin>
             <!--
-                Copy the configuration properties file and the directory 
+                Copy the configuration properties file and the directory
                 containing Mule configuration files to the target directory.
             -->
             <plugin>
@@ -345,7 +347,8 @@
 			    <configuration>
 			        <format>xml</format>
 			        <maxmem>256m</maxmem>
-			    </configuration>
+                    <check/>
+                </configuration>
 			</plugin>
 			<!-- Submit code coverage report to Coveralls.io. -->
             <plugin>
@@ -390,101 +393,4 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
-
-    <profiles>
-        <!-- 
-            JBoss Tattletale report generation profile.
-            Generate reports with: clean verify -DtattleTale -DskipTests
-        -->
-        <profile>
-            <activation>
-                <property>
-                    <name>tattleTale</name>
-                </property>
-            </activation>
-            <properties>
-                <!-- Temporary directory that will hold files that are to be analyzed by Tattletale. -->
-                <tattletale.tempdir>${project.build.directory}/temp-jar-directory</tattletale.tempdir>
-                <!--  Directory to which Tattletale reports will be written.-->
-                <tattletale.reportdir>${project.build.directory}/tattletale-report</tattletale.reportdir>
-                <!-- External Tattletale configuration file (not external to project). -->
-                <tattletale.configfile>${project.basedir}/jboss-tattletale.properties</tattletale.configfile>
-            </properties>
-            <build>
-                <plugins>
-                    <!-- 
-                        Copy JARs of all dependencies to directory that Tattletale is to analyze
-                        when creating reports.
-                    -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <version>2.9</version>
-                        <executions>
-                            <execution>
-                                <id>copy-dependencies</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>copy-dependencies</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${tattletale.tempdir}</outputDirectory>
-                                    <overWriteReleases>true</overWriteReleases>
-                                    <overWriteSnapshots>true</overWriteSnapshots>
-                                    <overWriteIfNewer>true</overWriteIfNewer>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <!--
-                        Copy JAR of this project to directory that Tattletale is to analyze when
-                        creating reports.
-                    -->
-                    <plugin>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <version>2.7</version>
-                        <executions>
-                            <execution>
-                                <id>copy-resources</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${tattletale.tempdir}</outputDirectory>
-                                    <resources>
-                                        <resource>
-                                            <directory>${project.build.directory}</directory>
-                                            <includes>
-                                                <include>${project.artifactId}-${project.version}.jar</include>
-                                            </includes>
-                                        </resource>
-                                    </resources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <!-- Generate Tattletale reports. -->
-                    <plugin>
-                        <groupId>org.jboss.tattletale</groupId>
-                        <artifactId>tattletale-maven</artifactId>
-                        <version>1.2.0.Beta2</version>
-                        <executions>
-                            <execution>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>report</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <source>${tattletale.tempdir}</source>
-                            <destination>${tattletale.reportdir}</destination>
-                            <configuration>${tattletale.configfile}</configuration>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
